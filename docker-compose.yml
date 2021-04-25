@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo:4.1.8-xenial
+    container_name: db
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "2001:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=$MONGO_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASSWORD
+    volumes:
+      - dbdata:/data/db
+    networks:
+      - scraper-network
+  scrapers:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    security_opt:
+      - seccomp=./chrome.json
+    image: node:12-slim
+    container_name: scrapers
+    env_file: .env
+    environment: 
+      - MONGO_USERNAME=$MONGO_USERNAME
+      - MONGO_PASSWORD=$MONGO_PASSWORD
+      - MONGO_HOSTNAME=mongo
+      - MONGO_PORT=$MONGO_PORT
+      - MONGO_DB=$MONGO_DB
+    volumes:
+      - .:/home/pptruser/app
+    command: ["/home/pptruser/app/start_scraper.sh"]
+    networks: 
+      - scraper-network
+
+networks:
+  scraper-network:
+    driver: bridge
+
+volumes:
+  node_modules:
+  dbdata:
+

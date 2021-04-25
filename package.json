@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "mongoose": "^5.12.5",
+    "puppeteer": "^9.0.0"
+  },
+
+  "scripts": {
+    "start": "export $(cat host.env | xargs) && node main.js"
+  }
+}
