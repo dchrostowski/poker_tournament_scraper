@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer')
-const {waitFor, insertRecord} = require('./util')
-const db = require('./db')
-const {TournamentResult, PlayerPosition} = require('./db_models')
+const {waitFor, insertRecord} = require('../util/util')
+const db = require('../util/db')
+const {TournamentResult, PlayerPosition} = require('../util/db_models')
 
 
 const SWCScraper = async () => {

@@ -1,5 +1,5 @@
-const {SWCScraper} = require('./SealsWithClubs')
-const {StockPokerScraper} = require('./StockPokerOnline')
+const {SWCScraper} = require('./scrapers/SealsWithClubs')
+const {StockPokerScraper} = require('./scrapers/StockPokerOnline')
 
 
 const runContinuously = async function () {

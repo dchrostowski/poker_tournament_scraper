@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer')
-const {waitFor, insertRecord} = require('./util')
-const db = require('./db')
-const {TournamentResult, PlayerPosition} = require('./db_models')
+const {waitFor, insertRecord} = require('../util/util')
+const db = require('../util/db')
+const {TournamentResult, PlayerPosition} = require('../util/db_models')
 
 
 const StockPokerScraper = async () => {
@@ -28,6 +28,8 @@ const StockPokerScraper = async () => {
           tournamentData['tournamentName'] = response.info.n
           tournamentData['startDate'] = response.info.sd
           tournamentData['endDate'] = response.info.le
+
+          console.log(tournamentData)
   
           
   
@@ -83,6 +85,7 @@ const StockPokerScraper = async () => {
   
       console.log("Loading play.stockpokeronline.com...")
       await page.goto('https://play.stockpokeronline.com/', { waitUntil: 'networkidle0', timeout: 60000 })
+
       
       
       const cdp = await page.target().createCDPSession();
@@ -91,12 +94,19 @@ const StockPokerScraper = async () => {
       
       cdp.on('Network.webSocketFrameReceived', parseResponse); // Fired when WebSocket message is received.
       cdp.on('Network.webSocketFrameSent', printRequest);
-      
+      // MISSING XPATH '//div[contains(@class,"Table__head")]/div[contains(@class,"Table__column" ) and contains(@class, "trct-status")]'
       
       const [tournamentButton] = await page.$x('//div[contains(@class,"lpg-lobby-tournaments_button")]')
       tournamentButton.click()
       await waitFor(3000)
+      const [tournamentStateHeader] = await page.$x('//div[contains(@class,"Table__head")]/div[contains(@class,"Table__column" ) and contains(@class, "trct-status")]')
+      await waitFor(3000)
+      await tournamentStateHeader.click()
+      await waitFor(3000)
+      
+      
       const tourneyLobbyButtons = await page.$x('//div[@class="actions"]')
+      await page.screenshot({'path': './look_at_tournaments.png'})
   
       for(let i=0; i<tourneyLobbyButtons.length; i++) {
         tourneyLobbyButtons[i].click()
