@@ -99,14 +99,25 @@ const StockPokerScraper = async () => {
       const [tournamentButton] = await page.$x('//div[contains(@class,"lpg-lobby-tournaments_button")]')
       tournamentButton.click()
       await waitFor(3000)
-      const [tournamentStateHeader] = await page.$x('//div[contains(@class,"Table__head")]/div[contains(@class,"Table__column" ) and contains(@class, "trct-status")]')
+      const [statusDropDown] = await page.$x('//div[@class="button-content"]/span[contains(text(),"Status")]/ancestor::div[@class="button-content"]')
+      console.log("found status")
+      await waitFor(1000)
+      console.log("wait")
+      await statusDropDown.click()
+      console.log("click dropdown")
       await waitFor(3000)
-      await tournamentStateHeader.click()
+      console.log("wait 2")
+  
+      const [any,completed,running,in_a_day,in_an_hour,late_reg] = await page.$x('//div[contains(@class, "Select__popup_item")]/div[@class="Checkbox__content"]')
+      await waitFor(1000)
+      await any.click()
+      await waitFor(1000)
+      await completed.click()
       await waitFor(3000)
       
       
       const tourneyLobbyButtons = await page.$x('//div[@class="actions"]')
-      await page.screenshot({'path': './look_at_tournaments.png'})
+      
   
       for(let i=0; i<tourneyLobbyButtons.length; i++) {
         tourneyLobbyButtons[i].click()

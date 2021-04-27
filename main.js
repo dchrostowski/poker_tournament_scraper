@@ -6,8 +6,9 @@ const runContinuously = async function () {
     console.log(1)
   
     while (true) {
-      await SWCScraper()
       await StockPokerScraper()
+      await SWCScraper()
+      
   
     }
   }
