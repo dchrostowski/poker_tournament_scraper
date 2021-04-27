@@ -16,6 +16,8 @@ services:
     networks:
       - scraper-network
   scrapers:
+    depends_on:
+      - mongo
     build: 
       context: .
       dockerfile: Dockerfile

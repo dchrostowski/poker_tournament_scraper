@@ -12,5 +12,6 @@ const runContinuously = async function () {
   
     }
   }
-  
-  runContinuously()
+
+runContinuously()
+
