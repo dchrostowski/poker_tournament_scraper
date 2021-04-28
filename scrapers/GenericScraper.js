@@ -40,7 +40,7 @@ const GenericScraper = async (config) => {
           tournamentData['bitcoinValue'] = config.bitcoinValue
           tournamentData['buyin'] = response.info.b / 100
           tournamentData['entryFee'] = response.info.e / 100
-          tournmanetData['currency'] = config.currency
+          tournamentData['currency'] = config.currency
 
           console.log(tournamentData)
           
