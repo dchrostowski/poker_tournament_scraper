@@ -5,7 +5,7 @@ This is a containerized web scraper and mongodb to pull tournament data from var
 # How to run
 1. `docker-compose up -d mongo`
 2. Wait about a minute for the database to initalize (was too lazy to write a wait-for script)
-3. `docker-compose up -d scrapers`
+3. To run the scrapers in a docker container run `docker-compose up -d scrapers`.  To run the scrapers on the host machine run `yarn start` instead.  They will connect to the mongo instance through port 2001 as specified in the `host.env` file.
 
 
 # View the data
