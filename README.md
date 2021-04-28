@@ -18,6 +18,6 @@ So far, all tournaments from https://swcpoker.club, https://stockpokeronline.com
 
 Todo: emebed screenshot
 
-
+![Screenshot of database](https://github.com/dchrostowski/poker_tournament_scraper/blob/master/data.png?raw=true)
 
 
