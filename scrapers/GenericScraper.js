@@ -3,8 +3,16 @@ const {waitFor, insertRecord} = require('../util/util')
 const db = require('../util/db')
 const {TournamentResult, PlayerPosition} = require('../util/db_models')
 
+class ScraperConfig {
+    constructor({site,tournamentIdPrefix,bitcoinValue, currency}) {
+        this.site = site
+        this.tournamentIdPrefix = tournamentIdPrefix
+        this.bitcoinValue = bitcoinValue
+        this.currency = currency
+    }
+}
 
-const StockPokerScraper = async () => {
+const GenericScraper = async (config) => {
 
     const printRequest = response => null;
   
@@ -20,26 +28,33 @@ const StockPokerScraper = async () => {
           response.hasOwnProperty('players') && // shows players
           response.players.length > 0 && // there is at least one player
           response.players[0].hasOwnProperty('n')) { // the first player has a username in the data
+
           
           const tournamentData = {}
-          tournamentData['site'] = 'stockpokeronline.com'
+          tournamentData['site'] = config.site
           tournamentData['tournamentId'] = response.info.i
-          tournamentData['uniqueId'] = 'SPO_' + response.info.i
+          tournamentData['uniqueId'] = config.tournamentIdPrefix + '_' + response.info.i
           tournamentData['tournamentName'] = response.info.n
           tournamentData['startDate'] = response.info.sd
           tournamentData['endDate'] = response.info.le
+          tournamentData['bitcoinValue'] = config.bitcoinValue
+          tournamentData['buyin'] = response.info.b / 100
+          tournamentData['entryFee'] = response.info.e / 100
+          tournmanetData['currency'] = config.currency
 
           console.log(tournamentData)
+          
   
           
   
           const unsortedPlayers = response.players.map((player) => {
+              
               return {
                 playerName: player.n,
                 position: player.p + 1,
                 prize1:  player.ma/100,
-                prize2: player.sa/100,
-                totalPrize: (player.ma + player.sa) / 100
+                prize2: player.bp/100,
+                totalPrize: (player.ma + player.bp) / 100
               }
           })
   
@@ -83,8 +98,8 @@ const StockPokerScraper = async () => {
   
       this.tournamentAndPlayers = {}
   
-      console.log("Loading play.stockpokeronline.com...")
-      await page.goto('https://play.stockpokeronline.com/', { waitUntil: 'networkidle0', timeout: 60000 })
+      console.log(`Loading ${config.site}...`)
+      await page.goto(`https://play.${config.site}/`, { waitUntil: 'networkidle0', timeout: 60000 })
 
       
       
@@ -140,4 +155,5 @@ const StockPokerScraper = async () => {
   
   }
 
-  exports.StockPokerScraper = StockPokerScraper
+  exports.ScraperConfig = ScraperConfig
+  exports.GenericScraper = GenericScraper

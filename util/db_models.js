@@ -13,10 +13,14 @@ const playerPosition = new Schema({
 const tournamentResult = new Schema({
         uniqueId: {type: String, required: true, unique: true},
         site: { type: String, required: true },
-        tournamentId: { type: Number, required: true }, // id
-        tournamentName: { type: String, required: true }, // info.n
-        startDate: { type: Date, required: true }, //info.sd
-        endDate: { type: Date, required: true }, //info.le 
+        tournamentId: { type: Number, required: true },
+        tournamentName: { type: String, required: true },
+        buyin: {type: Number, required: true},
+        entryFee: {type: Number, required: true},
+        startDate: { type: Date, required: true },
+        endDate: { type: Date, required: true },
+        bitcoinValue: {type: Number, required: true},
+        currency: {type: String, required: true},
         results: [playerPosition]
 })
 

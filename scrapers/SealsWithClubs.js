@@ -4,7 +4,7 @@ const db = require('../util/db')
 const {TournamentResult, PlayerPosition} = require('../util/db_models')
 
 
-const SWCScraper = async () => {
+const SWCScraper = async (bitcoinValue) => {
 
     const printRequest = response => null;
   
@@ -19,9 +19,12 @@ const SWCScraper = async () => {
         jsonData = JSON.parse(jsonData[1])
         if (jsonData.hasOwnProperty('t') && 
             jsonData['t'] === 'LobbyTournamentInfo') {
+
+            
             let tourneyName = jsonData.info.n
             if (!tourneyName) return
             if (jsonData.tables.length > 0) return
+            
   
             let rawPlayers = jsonData.players
   
@@ -56,6 +59,10 @@ const SWCScraper = async () => {
               tournamentData['startDate'] = jsonData.info.sd
               tournamentData['endDate'] = jsonData.info.le
               tournamentData['results'] = sortedPlayers
+              tournamentData['bitcoinValue'] = bitcoinValue
+              tournamentData['buyin'] = jsonData.info.b / 100
+              tournamentData['entryFee'] = jsonData.info.e / 100
+              tournamentData['currency'] = 'uBTC'
   
               const dbTournamentData = new TournamentResult({...tournamentData})
               insertRecord(dbTournamentData)
