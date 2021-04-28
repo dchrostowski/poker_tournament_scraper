@@ -12,11 +12,11 @@ This is a containerized web scraper and mongodb to pull tournament data from var
 You can use any mongo client and connect to the instance with the credentials specified in the `.env` file at `localhost:2001` or run this: `docker exec -it db mongo` to get a mongo shell.
 
 # What is being scraped
-So far, all tournaments from https://swcpoker.club and all tournaments from https://stockpokeronline.com
+So far, all tournaments from https://swcpoker.club, https://stockpokeronline.com, and https://roundercasino.com.  Will add more.
 
-Planning to add https://roundercasino.com soon.
+# Data 
 
-
+Todo: emebed screenshot
 
 
 
