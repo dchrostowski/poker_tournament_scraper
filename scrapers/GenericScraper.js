@@ -54,7 +54,8 @@ const GenericScraper = async (config) => {
                 position: player.p + 1,
                 prize1:  player.ma/100,
                 prize2: player.bp/100,
-                totalPrize: (player.ma + player.bp) / 100
+                totalPrize: (player.ma + player.bp) / 100,
+                rebuyAmount: (player.eb + player.rf) / 100
               }
           })
   

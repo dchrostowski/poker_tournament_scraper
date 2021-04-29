@@ -4,25 +4,25 @@ const { CoindeskScraper } = require('./scrapers/CoindeskScraper')
 
 
 const runContinuously = async function () {
-    console.log(1)
 
-    const bitcoinPrice = await CoindeskScraper()
+    
 
     const stockPokerConfig = new ScraperConfig({
       site:'stockpokeronline.com', 
       tournamentIdPrefix:'SPO', 
-      bitcoinValue:bitcoinPrice,
       currency: 'USD'
     })
 
     const rounderCasinoConfig = new ScraperConfig({
       site:'roundercasino.com',
       tournamentIdPrefix:'RC',
-      bitcoinValue:bitcoinPrice,
       currency: "USD"
     })
   
     while (true) {
+      const bitcoinPrice = await CoindeskScraper()
+      stockPokerConfig['bitcoinValue'] = bitcoinPrice
+      rounderCasinoConfig['bitcoinValue'] = bitcoinPrice
       await GenericScraper(stockPokerConfig)
       await GenericScraper(rounderCasinoConfig)
       await SWCScraper(bitcoinPrice)

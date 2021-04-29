@@ -7,7 +7,8 @@ const playerPosition = new Schema({
         position: { type: Number, required: true },
         prize1: { type: Number, default: 0 },
         prize2: { type: Number, default: 0 },
-        totalPrize: { type: Number, required: true}
+        totalPrize: { type: Number, required: true},
+        rebuyAmount: { type: Number, required: false}
 });
 
 const tournamentResult = new Schema({
