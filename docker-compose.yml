@@ -25,6 +25,7 @@ services:
       - seccomp=./chrome.json
     image: node:12-slim
     container_name: scrapers
+    restart: unless-stopped
     env_file: .env
     environment: 
       - MONGO_USERNAME=$MONGO_USERNAME
