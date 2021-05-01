@@ -17,10 +17,8 @@ let connection
 async function doConnect() {
     
         await waitFor(2000)
-        console.log("connection attempt")
         try {
             connection = await mongoose.connect(url, {useNewUrlParser: true});
-            console.log()
             return connection
         }
         catch(err) {

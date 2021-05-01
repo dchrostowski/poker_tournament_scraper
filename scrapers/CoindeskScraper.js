@@ -22,7 +22,7 @@ const CoindeskScraper = async () => {
       
       const [idk,bitcoinInput] = await page.$x('//div[@class="bitcoin-calculator"]//div[@class="input-wrapper"]/input[1]')
       const bitcoinValue = await page.evaluate(x => x.value, bitcoinInput)
-      console.log(bitcoinValue)
+      console.log("bitcoin is worth $" +  bitcoinValue)
       return parseFloat(bitcoinValue.replace(/,/g, ''))
 
 

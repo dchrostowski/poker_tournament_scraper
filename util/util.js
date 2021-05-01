@@ -1,27 +1,110 @@
+const {TournamentResult, RunningTournament} = require('./db_models')
 
-const insertRecord = (tournamentRecord) => {
-    const {tournamentName, uniqueId, results, site} = tournamentRecord
-    console.log(`inserting ${results.length} results for ${tournamentName} (${uniqueId})...`)
-    tournamentRecord.save(function (err) {
-      if (err) {
-        if (err.code == 11000) {
-          console.log(`duplicate tournament id for ${uniqueId}.  Ignoring.`)
-        }
-        else {
-          console.error(err)
-        }
+class ScraperConfig {
+  constructor({site,tournamentIdPrefix,bitcoinValue, currency, running}) {
+      this.site = site
+      this.tournamentIdPrefix = tournamentIdPrefix
+      this.bitcoinValue = bitcoinValue
+      this.currency = currency
+      this.running = running
+  }
+}
+
+function deleteRunning(uid) {
+  RunningTournament.deleteOne({uniqueId:uid}, function(err) {
+    if(err) {
+      console.log(err)
+    }
+  })
+}
+
+function validateChips(players) {
   
+  for(let i=0; i<players.length; i++) {
+    if(players[i].chips > 0) {
+      return true
+    }
+  }
+  return false
+}
+
+function validateNoChips(players) {
+
+  for(let i=0; i<players.length; i++) {
+    if(players[i].chips > 0) {
+      return false
+    }
+  }
+  return true
+}
+
+const insertRunning = ((runningRecord) => {
+  const {tournamentName, uniqueId, results, site, players} = runningRecord
+  if(validateChips(players)) {
+
+    RunningTournament.findOne({uniqueId: uniqueId}, function(err,existing) {
+      if(err) {
+        console.log(err)
+      }
+      if(existing) {
+        existing['players'] = players
+        existing['lastUpdate'] = Date.now()
+        existing.save(function(err) {
+          if(err) {
+            console.log(`error while inserting running ${site} tournament ${tournamentName}`)
+            console.log(err)
+          }
+          else {
+            console.log(`inserted running ${site} tournament ${tournamentName}`)
+          }
+        })
       }
       else {
-        console.log(`Successfully inserted tournament record for ${tournamentName}`)
+        runningRecord.save(function(err) {
+          if(err) {
+            console.log(`error while attempting to update ${site} tournament ${tournamentName}`)
+            console.log(err)
+          }
+          else {
+            console.log(`updated running ${site} tournament ${tournamentName}`)
+          }
+        })
       }
     })
+  }
+
+  else {
+    console.log(`error while validating running ${site} tournament ${tournamentName}: no players have chips!`)
+  }
+
+});
+
+const insertRecord = (tournamentRecord) => {
+    const {tournamentName, uniqueId, site, results} = tournamentRecord
+    if(validateNoChips(results)) {
+      deleteRunning(uniqueId)
+      console.log(`inserting ${results.length} results for ${tournamentName} (${uniqueId})...`)
+      tournamentRecord.save(function (err) {
+        if (err) {
+          if (err.code == 11000) {
+            console.log(`duplicate tournament id for ${uniqueId}.  Ignoring.`)
+          }
+          else {
+            console.error(err)
+          }
+    
+        }
+        else {
+          console.log(`Successfully inserted tournament record for ${tournamentName}`)
+        }
+      })
+
+    }
   }
   
   
   const waitFor = async (timeToWait) => {
     return new Promise((resolve) => {
-      //console.log("Waiting ", timeToWait / 1000, " seconds...")
       setTimeout(() => {
         resolve()
       }, timeToWait)
@@ -31,3 +114,5 @@ const insertRecord = (tournamentRecord) => {
 
   exports.waitFor = waitFor
   exports.insertRecord = insertRecord
+  exports.insertRunning = insertRunning
+  exports.ScraperConfig = ScraperConfig

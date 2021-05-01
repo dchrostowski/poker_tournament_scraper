@@ -9,7 +9,6 @@ const SWCScraper = async (bitcoinValue) => {
     const printRequest = response => null;
   
     const parseResponse = (async (response) => {
-      //console.log(response)
       response = response.response
       let jsonMatch = response.payloadData.match(/^42\/poker\/,(.+)$/)
       let jsonData

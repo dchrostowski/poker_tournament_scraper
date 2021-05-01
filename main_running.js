@@ -11,23 +11,19 @@ const runContinuously = async function () {
       site:'stockpokeronline.com', 
       tournamentIdPrefix:'SPO', 
       currency: 'USD',
-      running: false
+      running: true
     })
 
     const rounderCasinoConfig = new ScraperConfig({
       site:'roundercasino.com',
       tournamentIdPrefix:'RC',
       currency: "USD",
-      running: false
+      running: true
     })
   
     while (true) {
-      const bitcoinPrice = await CoindeskScraper()
-      stockPokerConfig['bitcoinValue'] = bitcoinPrice
-      rounderCasinoConfig['bitcoinValue'] = bitcoinPrice
-      await GenericScraper(stockPokerConfig)
       await GenericScraper(rounderCasinoConfig)
-      await SWCScraper(bitcoinPrice)
+      await GenericScraper(stockPokerConfig)
     }
   }
 
