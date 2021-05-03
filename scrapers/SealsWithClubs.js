@@ -4,7 +4,8 @@ const db = require('../util/db')
 const {TournamentResult, PlayerPosition} = require('../util/db_models')
 
 
-const SWCScraper = async (bitcoinValue) => {
+const SWCScraper = async (config) => {
+    const {bitcoinValue,running} = config
 
     const printRequest = response => null;
   
@@ -22,7 +23,7 @@ const SWCScraper = async (bitcoinValue) => {
             
             let tourneyName = jsonData.info.n
             if (!tourneyName) return
-            if (jsonData.tables.length > 0) return
+            if (!running && jsonData.tables.length > 0) return
             
   
             let rawPlayers = jsonData.players
@@ -31,40 +32,53 @@ const SWCScraper = async (bitcoinValue) => {
                   return PlayerPosition({
                     playerName: player['player-nick'],
                     position: player['place'] + 1,
+                    chips: player['cash'],
                     prize1: player['main-prize-amount'] / 100,
                     prize2: player['second-prize-amount'] / 100,
                     totalPrize: (player['main-prize-amount'] + player['second-prize-amount']) / 100
                   })
               })
+
+              if(running) {
+                console.log("UNSORTED PLAEYRS")
+                console.log(unsortedPlayers)
+                return
+
+              }
+
+              else {
+                let badData = false
+                unsortedPlayers.forEach((player) => {
+                  if(player.position === 0) {
+                    console.log("bad data, skipping")
+                    badData = true
+                    return
+                  }
+                })
+    
+                if(badData) return
+    
+                const sortedPlayers = unsortedPlayers.sort((a,b) => (a.position > b.position ? 1 : -1))
+    
+                const tournamentData = {}
+                tournamentData['site'] = 'swcpoker.club'
+                tournamentData['tournamentId'] = jsonData.info.i
+                tournamentData['uniqueId'] = 'SWC_' + jsonData.info.i
+                tournamentData['tournamentName'] = tourneyName
+                tournamentData['startDate'] = jsonData.info.sd
+                tournamentData['endDate'] = jsonData.info.le
+                tournamentData['results'] = sortedPlayers
+                tournamentData['bitcoinValue'] = bitcoinValue
+                tournamentData['buyin'] = jsonData.info.b / 100
+                tournamentData['entryFee'] = jsonData.info.e / 100
+                tournamentData['currency'] = 'uBTC'
+    
+                const dbTournamentData = new TournamentResult({...tournamentData})
+                insertRecord(dbTournamentData)
+
+              }
   
-              let badData = false
-              unsortedPlayers.forEach((player) => {
-                if(player.position === 0) {
-                  console.log("bad data, skipping")
-                  badData = true
-                  return
-                }
-              })
-  
-              if(badData) return
-  
-              const sortedPlayers = unsortedPlayers.sort((a,b) => (a.position > b.position ? 1 : -1))
-  
-              const tournamentData = {}
-              tournamentData['site'] = 'swcpoker.club'
-              tournamentData['tournamentId'] = jsonData.info.i
-              tournamentData['uniqueId'] = 'SWC_' + jsonData.info.i
-              tournamentData['tournamentName'] = tourneyName
-              tournamentData['startDate'] = jsonData.info.sd
-              tournamentData['endDate'] = jsonData.info.le
-              tournamentData['results'] = sortedPlayers
-              tournamentData['bitcoinValue'] = bitcoinValue
-              tournamentData['buyin'] = jsonData.info.b / 100
-              tournamentData['entryFee'] = jsonData.info.e / 100
-              tournamentData['currency'] = 'uBTC'
-  
-              const dbTournamentData = new TournamentResult({...tournamentData})
-              insertRecord(dbTournamentData)
+
         }
       }
     })
@@ -105,13 +119,26 @@ const SWCScraper = async (bitcoinValue) => {
   
       
       let [statusButton] = await page.$x('//div[@class="tournament-list-header"]/div[contains(@class,"tournament-status")]')
+      
       await statusButton.click()
       await waitFor(5000)
-      await statusButton.click()
-      await waitFor(5000)
-      const completedDivs = await page.$x('//div[@class="tournaments"]//div[@class="panel tournament-line completed"]')
+      if(!running) {
+        await statusButton.click()
+        await waitFor(5000)
+      }
+      let targetDivs = []
+      if(!running) {
+        targetDivs = await page.$x('//div[@class="tournaments"]//div[@class="panel tournament-line completed"]')
+      }
+
+      else {
+        const runningDivs = await page.$x('//div[@class="panel tournament-line running"]')
+        const latRegDivs = await page.$x('//div[@class="panel tournament-line late-registration running"]')
+        targetDivs = runningDivs.concat(latRegDivs)
+      }
+       
   
-      for (let i = 0; i < completedDivs.length; i++) {
+      for (let i = 0; i < targetDivs.length; i++) {
         let refreshCompleted = await page.$x('//div[@class="tournaments"]//div[@class="panel tournament-line completed"]')
         let div = refreshCompleted[i]
         await div.click()
