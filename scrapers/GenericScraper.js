@@ -27,7 +27,7 @@ const GenericScraper = async (config) => {
           tournamentData['tournamentName'] = response.info.n
           tournamentData['startDate'] = response.info.sd
           tournamentData['endDate'] = response.info.le
-          tournamentData['bitcoinValue'] = config.bitcoinValue
+          tournamentData['bitcoinValue'] = config.cryptocurrency.BTC.usdValue
           tournamentData['buyin'] = response.info.b / 100
           tournamentData['entryFee'] = response.info.e / 100
           tournamentData['currency'] = config.currency
@@ -101,7 +101,7 @@ const GenericScraper = async (config) => {
               uniqueId: tournamentData['uniqueId'],
               site: tournamentData['site'],
               players: runningSortedPlayers,
-              lastUpdate: Date.now()
+              lastUpdate: new Date().getTime()
 
             })
 

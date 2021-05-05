@@ -14,6 +14,14 @@ const playerPosition = new Schema({
         chips: {type: Number, required: false}
 });
 
+const cryptocurrencyValue = new Schema({
+        name: {type:String, required:true},
+        abbreviation: {type: String, required: true},
+        date: {type: Date, required: true},
+        usdValue: {type: Number, required:true}
+
+})
+
 const tournamentResult = new Schema({
         uniqueId: {type: String, required: true, unique: true},
         site: { type: String, required: true },
@@ -23,7 +31,7 @@ const tournamentResult = new Schema({
         entryFee: {type: Number, required: true},
         startDate: { type: Date, required: true },
         endDate: { type: Date, required: true },
-        bitcoinValue: {type: Number, required: true},
+        bitcoinValue: {type: Number, required: false},
         currency: {type: String, required: true},
         results: [playerPosition]
 })
@@ -40,6 +48,7 @@ const runningTournament = new Schema({
 const TournamentResult = mongoose.model('TournamentResult', tournamentResult)
 const PlayerPosition = mongoose.model('PlayerPosition', playerPosition)
 const RunningTournament = mongoose.model('RunningTournament',runningTournament)
+const CryptocurrencyValue = mongoose.model('CryptocurrencyValue', cryptocurrencyValue)
 
 
-module.exports = {TournamentResult, PlayerPosition, RunningTournament}
+module.exports = {TournamentResult, PlayerPosition, RunningTournament, CryptocurrencyValue}
