@@ -20,10 +20,24 @@ const runContinuously = async function () {
       currency: "USD",
       running: true
     })
+
+    const swcConfig = new ScraperConfig({
+      site: 'swcpoker.club',
+      tournamentPrefix: 'SWC',
+      currency: 'USD',
+      running: true
+    })
   
     while (true) {
+      const cryptoVals = await CoindeskScraper()
+      swcConfig['cryptocurrency'] = cryptoVals
+      rounderCasinoConfig['cryptocurrency'] = cryptoVals
+      stockPokerConfig['cryptocurrency'] = cryptoVals
+      
       await GenericScraper(rounderCasinoConfig)
       await GenericScraper(stockPokerConfig)
+      await SWCScraper(swcConfig)
+
     }
   }
 

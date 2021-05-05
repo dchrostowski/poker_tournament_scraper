@@ -1,14 +1,16 @@
-const {TournamentResult, RunningTournament} = require('./db_models')
+const {TournamentResult, RunningTournament, CryptocurrencyValue} = require('./db_models')
 
 class ScraperConfig {
-  constructor({site,tournamentIdPrefix,bitcoinValue, currency, running}) {
+  constructor({site,tournamentIdPrefix,cryptocurrency, currency, running}) {
       this.site = site
       this.tournamentIdPrefix = tournamentIdPrefix
-      this.bitcoinValue = bitcoinValue
+      this.cryptocurrency = cryptocurrency
       this.currency = currency
       this.running = running
   }
 }
+
+
 
 function deleteRunning(uid) {
   RunningTournament.deleteOne({uniqueId:uid}, function(err) {
@@ -36,6 +38,17 @@ function validateNoChips(players) {
     }
   }
   return true
+}
+
+function insertCryptoRecord(args) {
+  const cryptoRecord = new CryptocurrencyValue({date: new Date().getTime(),...args})
+  cryptoRecord.save(function(err) {
+    if(err) {
+      console.error(err)
+    }
+    ``
+  })
+
 }
 
 const insertRunning = ((runningRecord) => {
@@ -112,7 +125,4 @@ const insertRecord = (tournamentRecord) => {
     })
   }
 
-  exports.waitFor = waitFor
-  exports.insertRecord = insertRecord
-  exports.insertRunning = insertRunning
-  exports.ScraperConfig = ScraperConfig
+  module.exports = {waitFor,insertRecord,insertRunning,ScraperConfig,insertCryptoRecord}
