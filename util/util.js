@@ -63,7 +63,7 @@ const updateRunning = (uniqueId,players) => {
       existing['lastUpdate'] = Date.now()
       existing.save(function(err) {
         if(err) {
-          console.log(`error while inserting running ${site} tournament ${tournamentName}`)
+          console.log(`error while updating ${uniqueId}`)
           console.log(err)
         }
         else {
@@ -80,7 +80,7 @@ const insertRunning = ((runningRecord) => {
   const {tournamentName, uniqueId, results, site} = runningRecord
       runningRecord.save(function(err) {
         if(err) {
-          console.log(`error while attempting to update ${site} tournament ${tournamentName}`)
+          console.log(`error while attempting to insert ${site} tournament ${tournamentName}`)
           
         }
         else {
