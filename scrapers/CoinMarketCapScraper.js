@@ -15,12 +15,13 @@ async function getPrice(url) {
     })
     console.log(`laoding ${url}...`)
     await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 })
-    const xpath = '//section[@class="coin-info"]//div[@class="data-definition"]/div[@class="price-large"]'
+    
+    const xpath = '//div[@class="priceValue "]/span'
 
-    const [priceDiv] = await page.$x(xpath)
-    const priceText = await page.evaluate(div => div.innerText, priceDiv)
+    const [priceSpan] = await page.$x(xpath)
+    const priceText = await page.evaluate(span => span.innerText, priceSpan)
+    
 
-    console.log(priceText)
     priceFloat = parseFloat(priceText.replace(/\$|,/g, ''))
     
 
@@ -37,14 +38,11 @@ async function getPrice(url) {
 }
 
 
-const CoindeskScraper = async () => {
+const CoinMarketCapScraper = async () => {
 
-  const btcValue = await getPrice(`https://www.coindesk.com/price/bitcoin`)
-  const bchValue = await getPrice(`https://www.coindesk.com/price/bitcoin-cash`)
-
-  console.log("bitcoin is worth $" + btcValue)
-  console.log("bitcoin cash is worth $" + bchValue)
-
+  const btcValue = await getPrice(`https://coinmarketcap.com/currencies/bitcoin/`)
+  const bchValue = await getPrice(`https://coinmarketcap.com/currencies/bitcoin-cash/`)
+  
   return {
     BTC: {name: 'bitcoin', usdValue: btcValue, abbreviation: 'BTC'},
     BCH: {name: 'bitcoin cash', usdValue: bchValue, abbreviation: 'BCH'},
@@ -56,4 +54,4 @@ const CoindeskScraper = async () => {
 
 }
 
-exports.CoindeskScraper = CoindeskScraper
+exports.CoinMarketCapScraper = CoinMarketCapScraper

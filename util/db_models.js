@@ -10,7 +10,7 @@ const playerPosition = new Schema({
         prize1: { type: Number, default: 0 },
         prize2: { type: Number, default: 0 },
         totalPrize: { type: Number, required: true},
-        rebuyAmount: { type: Number, required: false},
+        numRebuys: { type: Number, required: false},
         chips: {type: Number, required: false}
 });
 
