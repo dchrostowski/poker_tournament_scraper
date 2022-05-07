@@ -133,8 +133,15 @@ const GenericScraper = async (config) => {
             tournamentData['bitcoinValue'] = config.cryptocurrency.BTC.usdValue
             tournamentData['buyin'] = ( response.info.b || 0 ) / 100
             tournamentData['entryFee'] = (response.info.e || 0 ) / 100
-            const dbTournamentResult = new TournamentResult({...tournamentData})
-            insertRecord(dbTournamentResult)
+            
+            if(response.info.le.indexOf('0000-00-00') !== -1) {
+              console.log("skip insert")
+            }
+            else {
+              const dbTournamentResult = new TournamentResult({...tournamentData})
+              insertRecord(dbTournamentResult)
+            }
+              
             
           }
 
@@ -195,13 +202,16 @@ const GenericScraper = async (config) => {
       
       const [statusDropDown] = await page.$x('//div[@class="block Select__content"]/div[@class="block panel button Select__button"]/div[@class="block button-content"]/span[contains(text(),"Status")]')
       await waitFor(3000)
-      await statusDropDown.click()
+
+      await page.screenshot({path:'./rounder1.png'})
+      statusDropDown.click()
       await waitFor(3000)
-      
+      await page.screenshot({path:'./rounder2.png'})
       const [any,completed,running,in_a_day,in_an_hour,late_reg] = await page.$x('//div[contains(@class, "Select__popup_item")]/div[contains(@class,"Checkbox__content")]')
       await waitFor(1000)
-      await any.click()
+      any.click()
       await waitFor(1000)
+      await page.screenshot({path:'./rounder3.png'})
 
 
       if(config.running) {
@@ -217,12 +227,15 @@ const GenericScraper = async (config) => {
         await waitFor(3000)
       }
 
+      await page.screenshot({path:'./rounder4.png'})
+
       const tourneyLobbyButtons = await page.$x('//div[@class="actions"]')
       
   
       for(let i=0; i<tourneyLobbyButtons.length; i++) {
         tourneyLobbyButtons[i].click()
         await waitFor(3000)
+        await page.screenshot({path:'./rounder5.png'})
         const [xButton] = await page.$x('//div[contains(@class,"close_action")]')
         await waitFor(2000)
         xButton.click()
