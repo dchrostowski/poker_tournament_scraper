@@ -67,7 +67,7 @@ const updateRunning = (uniqueId,players) => {
           console.log(err)
         }
         else {
-          console.log(`inserted running tournament ${tournamentName}`)
+          console.log(`updated running tournament ${uniqueId}`)
         }
       })
     }
