@@ -1,6 +1,6 @@
 const {SWCScraper} = require('./scrapers/SealsWithClubs')
 const { GenericScraper } = require('./scrapers/GenericScraper')
-const { CoindeskScraper } = require('./scrapers/CoindeskScraper')
+const { CoinMarketCapScraper } = require('./scrapers/CoinMarketCapScraper')
 const {ScraperConfig, insertCryptoRecord} = require('./util/util')
 
 const runContinuously = async function () {
@@ -33,7 +33,7 @@ const runContinuously = async function () {
     })
   
     while (true) {
-      const cryptoVals = await CoindeskScraper()
+      const cryptoVals = await CoinMarketCapScraper()
 
       
       stockPokerConfig.cryptocurrency = cryptoVals
@@ -42,11 +42,9 @@ const runContinuously = async function () {
 
       await GenericScraper(stockPokerConfig)
       await GenericScraper(rounderCasinoConfig)
-      await SWCScraper(swcConfig)
+      //await SWCScraper(swcConfig)
       Object.keys(cryptoVals).forEach(key => insertCryptoRecord(cryptoVals[key]))
     }
   }
 
 runContinuously()
-
-
