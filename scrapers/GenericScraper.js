@@ -203,15 +203,15 @@ const GenericScraper = async (config) => {
       const [statusDropDown] = await page.$x('//div[@class="block Select__content"]/div[@class="block panel button Select__button"]/div[@class="block button-content"]/span[contains(text(),"Status")]')
       await waitFor(3000)
 
-      await page.screenshot({path:'./rounder1.png'})
+      
       statusDropDown.click()
       await waitFor(3000)
-      await page.screenshot({path:'./rounder2.png'})
+      
       const [any,completed,running,in_a_day,in_an_hour,late_reg] = await page.$x('//div[contains(@class, "Select__popup_item")]/div[contains(@class,"Checkbox__content")]')
       await waitFor(1000)
       any.click()
       await waitFor(1000)
-      await page.screenshot({path:'./rounder3.png'})
+      
 
 
       if(config.running) {
@@ -227,7 +227,7 @@ const GenericScraper = async (config) => {
         await waitFor(3000)
       }
 
-      await page.screenshot({path:'./rounder4.png'})
+      
 
       const tourneyLobbyButtons = await page.$x('//div[@class="actions"]')
       
