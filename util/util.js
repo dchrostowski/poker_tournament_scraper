@@ -139,6 +139,8 @@ const insertRecord = (tournamentRecord) => {
           console.log(`duplicate tournament id for ${uniqueId}.  Ignoring.`)
         }
         else {
+          console.log(`error inserting record for ${uniqueId}:`)
+          
           console.error(err)
         }
   
