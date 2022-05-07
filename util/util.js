@@ -80,7 +80,14 @@ const insertRunning = ((runningRecord) => {
   const {tournamentName, uniqueId, results, site} = runningRecord
       runningRecord.save(function(err) {
         if(err) {
-          console.log(`error while attempting to insert ${site} tournament ${tournamentName}`)
+          
+          if (err.code == 11000) {
+            console.log(`duplicate tournament id for ${uniqueId}.  Ignoring.`)
+          }
+          else {
+            console.log(`error while attempting to insert ${site} tournament ${tournamentName}`)
+            console.error(err)
+          }
           
         }
         else {
