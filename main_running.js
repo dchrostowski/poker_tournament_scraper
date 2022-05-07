@@ -30,7 +30,7 @@ const runContinuously = async function () {
   
     while (true) {
       const cryptoVals = await CoinMarketCapScraper()
-      swcConfig['cryptocurrency'] = cryptoVals
+      //swcConfig['cryptocurrency'] = cryptoVals
       rounderCasinoConfig['cryptocurrency'] = cryptoVals
       stockPokerConfig['cryptocurrency'] = cryptoVals
       

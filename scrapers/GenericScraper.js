@@ -131,8 +131,8 @@ const GenericScraper = async (config) => {
             tournamentData['startDate'] = response.info.sd
             tournamentData['endDate'] = response.info.le
             tournamentData['bitcoinValue'] = config.cryptocurrency.BTC.usdValue
-            tournamentData['buyin'] = response.info.b / 100
-            tournamentData['entryFee'] = response.info.e / 100
+            tournamentData['buyin'] = ( response.info.b || 0 ) / 100
+            tournamentData['entryFee'] = (response.info.e || 0 ) / 100
             const dbTournamentResult = new TournamentResult({...tournamentData})
             insertRecord(dbTournamentResult)
             
