@@ -81,7 +81,7 @@ const insertRunning = ((runningRecord) => {
       runningRecord.save(function(err) {
         if(err) {
           console.log(`error while attempting to update ${site} tournament ${tournamentName}`)
-          console.log(err)
+          
         }
         else {
           console.log(`updated running ${site} tournament ${tournamentName}`)
@@ -98,8 +98,12 @@ const updateRecord = (uniqueId, results) => {
       existing['lastUpdate'] = Date.now()
       existing.save(function(err) {
         if(err) {
-          console.log(`error while inserting running ${existing['site']} tournament ${existing['tournamentName']}`)
-          console.log(err)
+          if (err.code == 11000) {
+            console.log(`duplicate tournament id for ${uniqueId}.  Ignoring.`)
+          }
+          else {
+            console.error(err)
+          }
         }
         else {
           console.log(`inserted running ${existing['site']} tournament ${existing['tournamentName']}`)
