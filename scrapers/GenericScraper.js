@@ -180,18 +180,25 @@ const GenericScraper = async (config) => {
         const [passwordInput] = await page.$x('//input[@name="password"]')
         const [loginButton] = await page.$x('//div[contains(@class,"SimpleButton__content")]/div[text()="Sign In"]')
         
-        
-        usernameInput.click()
-        await waitFor(1000)
-        page.keyboard.type(ROUNDER_USERNAME)
-        await waitFor(1000)
-        
-        passwordInput.click()
-        await waitFor(1000)
-        page.keyboard.type(ROUNDER_PASSWORD)
-        await waitFor(1000)
-        loginButton.click()
-        await waitFor(3000)
+        try {
+          usernameInput.click()
+          await waitFor(1000)
+          page.keyboard.type(ROUNDER_USERNAME)
+          await waitFor(1000)
+
+          passwordInput.click()
+          await waitFor(1000)
+          page.keyboard.type(ROUNDER_PASSWORD)
+          await waitFor(1000)
+          loginButton.click()
+          await waitFor(3000)
+        }
+        catch(error) {
+          console.log("error on login:")
+          console.log(ROUNDER_USERNAME)
+          console.log(ROUNDER_PASSWORD)
+          console.log(error)
+        }
         
       }
 
