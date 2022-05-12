@@ -1,11 +1,4 @@
-// (r._jCFcX = 65), //announced
-// (r._x1Qpu = 71), // registering
-// (r._u0W9A = 83), //seating
-// (r._5yiix = 82), // running
-// (r._x3WqU = 67), // cancelled
-// (r._fwdNH = 68), // done
-// (r._VKOY7 = 85), // unfinished
-// (t.a = r);
+const { PlayerPosition } = require("./db_models");
 
 const Tournament = (id, name) => {
   return {
@@ -32,8 +25,9 @@ const TournamentDetail = (lobbyTournamentInfo) => {
     entryFee: entryFee,
     startDate: startDate,
     endDate: endDate,
+    bounty: bounty,
     results: [],
-    recievedPlayerData: false,
+    receivedPlayerData: false,
   };
 };
 
@@ -71,38 +65,38 @@ const getTournamentState = (tournamentData) => {
 };
 
 const initialMessage = (msgId) => {
-  return JSON.stringify({
+  return {
     clientVersion: "HTML5",
     locale: "en",
     protocolVersion: 0,
     skinName: "stockpoker",
     id: msgId,
     t: "ClientVersion",
-  });
+  };
 };
 
 const tournamentListMessage = () => {
-  return JSON.stringify({
+  return {
     tournamentType: -1,
     t: "GetTournamentsList",
-  });
+  };
 };
 
 const lobbyTournamentInfoMessage = (tournamentId) => {
-  return JSON.stringify({
+  return {
     tournamentId: tournamentId,
     t: "GetLobbyTournamentInfo",
-  });
+  };
 };
 
 const tournamentPlayersMessage = (tournamentId) => {
-  return JSON.stringify({
+  return {
     tournamentId: tournamentId,
     offset: 0,
     amount: -1,
     sortBy: "",
     t: "GetTournamentPlayers",
-  });
+  };
 };
 
 const generateLobbyTournamentInfoMessages = (tournamentList) => {
@@ -112,9 +106,79 @@ const generateLobbyTournamentInfoMessages = (tournamentList) => {
   });
 };
 
+const subscribeTournamentMessage = (tournamentId) => {
+  return { tournamentId: tournamentId, t: "SubscribeTournament" };
+};
+
 const parsePlayerData = (playerDataResponse) => {
-    return ['hi']
-}
+  if (!playerDataResponse?.players || !playerDataResponse?.players[0]?.n)
+    return null;
+  const unsortedPlayers = playerDataResponse.players.map((player) => {
+    const bp = player?.bp || 0;
+    const eb = player?.eb || 0;
+    const rf = player?.rf || 0;
+    const ma = player?.ma || 0;
+    const nr = player?.nr || 1;
+    const na = player?.na || 0;
+
+    return {
+      playerName: player.n,
+      position: player.p + 1,
+      prize1: ma / 100,
+      prize2: bp / 100,
+      totalPrize: (ma + bp) / 100,
+      numRebuys: nr - 1,
+      numAddons: na,
+      chips: player.c,
+    };
+  });
+  return unsortedPlayers;
+};
+
+const processPlayersRunning = (unsortedPlayers) => {
+  const dbUnsortedPlayers = unsortedPlayers.map((player) => {
+    return PlayerPosition({ ...player });
+  });
+
+  let eliminated = dbUnsortedPlayers.filter((player) => player.position > 0);
+  let stillPlaying = dbUnsortedPlayers.filter(
+    (player) => player.position === 0
+  );
+
+  stillPlaying = stillPlaying.sort((a, b) => (a.chips < b.chips ? 1 : -1));
+  eliminated = eliminated.sort((a, b) => (a.position > b.position ? 1 : -1));
+  for (let j = 1; j <= stillPlaying.length; j++) {
+    stillPlaying[j - 1].position = j;
+  }
+
+  const runningSortedPlayers = stillPlaying.concat(eliminated);
+  return runningSortedPlayers;
+};
+
+const processPlayersCompleted = (unsortedPlayers) => {
+  const winners = unsortedPlayers.filter((player) => player.position === 1);
+  const losers = unsortedPlayers.filter((player) => player.position > 1);
+
+  const sortedWinners = winners.sort((a, b) => (a.prize1 < b.prize1 ? 1 : -1));
+  for (let i = 0; i < sortedWinners.length; i++) {
+    sortedWinners[i].position = i + 1;
+  }
+  const sortedLosers = losers.sort((a, b) =>
+    a.position > b.position ? 1 : -1
+  );
+
+  const sortedPlayers = sortedWinners.concat(sortedLosers);
+  const databaseSortedPlayers = sortedPlayers.map((player) => {
+    return new PlayerPosition({ ...player });
+  });
+
+  for (let i = 0; i < sortedPlayers.legnth; i++) {
+    sortedPlayers[i]["prize1"] = sortedPlayers[i]["prize1"] / 100;
+    sortedPlayers[i]["prize2"] = sortedPlayers[i]["prize2"] / 100;
+    sortedPlayers[i]["totalPrize"] = sortedPlayers[i]["totalPrize"] / 100;
+  }
+  return sortedPlayers;
+};
 
 module.exports = {
   initialMessage,
@@ -125,5 +189,8 @@ module.exports = {
   parseTournamentList,
   generateLobbyTournamentInfoMessages,
   tournamentPlayersMessage,
-  parsePlayerData
+  parsePlayerData,
+  subscribeTournamentMessage,
+  processPlayersCompleted,
+  processPlayersRunning,
 };

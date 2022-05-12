@@ -8,8 +8,13 @@ const {
   parseTournamentList,
   parseLobbyTournamentInfo,
   generateLobbyTournamentInfoMessages,
-  parsePlayerData
+  parsePlayerData,
+  tournamentPlayersMessage,
+  subscribeTournamentMessage,
+  processPlayersCompleted,
+  processPlayersRunning,
 } = require("./util");
+console.log(subscribeTournamentMessage);
 
 const getTournamentData = (socketUrl) => {
   const ws = new WebSocket(socketUrl);
@@ -26,7 +31,7 @@ const getTournamentData = (socketUrl) => {
   };
 
   const isComplete = () => {
-    if (socketData.state !== "playerData") return false;
+    if (socketData.state !== "lobbyInfo") return false;
 
     if (socketData.state === "lobbyInfo") {
       if (socketData.tournamentList.length === 0) return false;
@@ -38,19 +43,20 @@ const getTournamentData = (socketUrl) => {
           return false;
         }
       }
-      
+
       socketData.state = "playerData";
-      console.log("entered playerData state")
+      console.log("entered playerData state");
     }
 
-    const runningAndCompletedIds = socketData.completedIDs.concat(socketData.runningIDs)
+    const runningAndCompletedIds = socketData.completedIDs.concat(
+      socketData.runningIDs
+    );
 
-    for (let i = 0; i<runningAndCompletedIds.length; i++) {
-        let tId = runningAndCompletedIds[i]
-        if(!socketData.tournamentData[tId].recievedPlayerData) {
-            return false
-        }
-
+    for (let i = 0; i < runningAndCompletedIds.length; i++) {
+      let tId = runningAndCompletedIds[i];
+      if (!socketData.tournamentData[tId].receivedPlayerData) {
+        return false;
+      }
     }
 
     socketData.complete = true;
@@ -70,11 +76,14 @@ const getTournamentData = (socketUrl) => {
 
   ws.on("open", function open() {
     console.log("connected");
-    ws.send(initialMessage(socketData.msgId), incrementMsgId);
+    ws.send(JSON.stringify(initialMessage(socketData.msgId)), incrementMsgId);
   });
 
   const ping = setInterval(() => {
-    ws.send(tournamentListMessage(socketData.msgId), incrementMsgId);
+    ws.send(
+      JSON.stringify({ ...tournamentListMessage(), id: socketData.msgId }),
+      incrementMsgId
+    );
   }, 5000);
 
   ws.on("close", function close(code, reason) {
@@ -86,7 +95,7 @@ const getTournamentData = (socketUrl) => {
   ws.on("message", function message(data) {
     if (socketData.tournamentList.length > 0 && socketData.state === "init") {
       socketData.state = "lobbyInfo";
-      console.log("entered lobbyInfo state")
+      console.log("entered lobbyInfo state");
       const messages = generateLobbyTournamentInfoMessages(
         socketData.tournamentList
       );
@@ -94,8 +103,11 @@ const getTournamentData = (socketUrl) => {
       messages.forEach((message, idx) => {
         setTimeout(() => {
           console.log("sending message " + idx);
-          ws.send({ ...message, id: socketData.msgId }, incrementMsgId);
-        }, idx * 300);
+          ws.send(
+            JSON.stringify({ ...message, id: socketData.msgId }),
+            incrementMsgId
+          );
+        }, idx * 500);
       });
     }
 
@@ -107,23 +119,103 @@ const getTournamentData = (socketUrl) => {
     const jsonResponse = JSON.parse(data.toString());
 
     switch (jsonResponse.t) {
-      case "GetTournamentPlayers":
+      case "TournamentPlayers":
+        console.log("tournament players");
+        console.log(jsonResponse.players)
 
+        const playerData = parsePlayerData(jsonResponse);
+        const tournamentState =
+          socketData.tournamentData[jsonResponse.tournamentId].state;
+
+        if (playerData === null) {
+          ws.send(
+            JSON.stringify({
+              ...tournamentPlayersMessage(jsonResponse.tournamentId),
+              id: socketData.msgId,
+            }),
+            incrementMsgId
+          );
+        } else {
+          if (tournamentState === "running") {
+            const sortedPlayerData = processPlayersRunning(playerData);
+            socketData.tournamentData[jsonResponse.tournamentId].results =
+              sortedPlayerData;
+            socketData.tournamentData[
+              jsonResponse.tournamentId
+            ].receivedPlayerData = true;
+          }
+          if (tournamentState === "completed") {
+            console.log(jsonResponse.players.length);
+            console.log(playerData);
+            const sortedPlayerData = processPlayersCompleted(playerData);
+            if (sortedPlayerData[0].position == 1) {
+              socketData.tournamentData[jsonResponse.tournamentId].results =
+                sortedPlayerData;
+              socketData.tournamentData[
+                jsonResponse.tournamentId
+              ].receivedPlayerData = true;
+            } else {
+              ws.send(
+                JSON.stringify({
+                  ...tournamentPlayersMessage(jsonResponse.tournamentId),
+                  id: socketData.msgId,
+                }),
+                incrementMsgId
+              );
+            }
+          }
+        }
+
+        break;
       case "LobbyTournamentInfo":
         const tDetail = parseLobbyTournamentInfo(jsonResponse);
         socketData.tournamentData[tDetail.tournamentId] = tDetail;
+        console.log("got tDetail");
+        console.log(tDetail.state);
         if (tDetail.state === "completed") {
+          console.log(
+            "requesting player data for completed tournament" +
+              tDetail.tournamentName
+          );
           socketData.completedIDs.push(tDetail.tournamentId);
           ws.send(
-            { ...tournamentPlayersMessage(), id: socketData.msgId },
-            incrementMsgId
+            JSON.stringify({
+              ...subscribeTournamentMessage(tDetail.tournamentId),
+              id: socketData.msgId,
+            }),
+            () => {
+              incrementMsgId();
+              ws.send(
+                JSON.stringify({
+                  ...tournamentPlayersMessage(tDetail.tournamentId),
+                  id: socketData.msgId,
+                }),
+                incrementMsgId
+              );
+            }
           );
         }
         if (tDetail.state === "running") {
           socketData.runningIDs.push(tDetail.tournamentId);
+          console.log(
+            "requesting player data for running tournament" +
+              tDetail.tournamentName
+          );
           ws.send(
-            { ...tournamentPlayersMessage(), id: socketData.msgId },
-            incrementMsgId
+            JSON.stringify({
+              ...subscribeTournamentMessage(tDetail.tournamentId),
+              id: socketData.msgId,
+            }),
+            () => {
+              incrementMsgId();
+              ws.send(
+                JSON.stringify({
+                  ...tournamentPlayersMessage(tDetail.tournamentId),
+                  id: socketData.msgId,
+                }),
+                incrementMsgId
+              );
+            }
           );
         }
         break;
@@ -141,7 +233,10 @@ const getTournamentData = (socketUrl) => {
       if (socketData.tournamentList.length === 0) {
         setTimeout(function timeout() {
           ws.send(
-            { ...tournamentListMessage(), id: socketData.msgId },
+            JSON.stringify({
+              ...tournamentListMessage(),
+              id: socketData.msgId,
+            }),
             incrementMsgId
           );
           // ws.send(getTournamentListMessage(socketData.msgId), (err) => {
