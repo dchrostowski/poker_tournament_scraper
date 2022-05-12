@@ -123,7 +123,7 @@ const parsePlayerData = (playerDataResponse) => {
 
     return {
       playerName: player.n,
-      position: player.p + 1,
+      position: (player?.p || 0) + 1,
       prize1: ma / 100,
       prize2: bp / 100,
       totalPrize: (ma + bp) / 100,

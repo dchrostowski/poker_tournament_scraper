@@ -128,13 +128,7 @@ const getTournamentData = (socketUrl) => {
           socketData.tournamentData[jsonResponse.tournamentId].state;
 
         if (playerData === null) {
-          ws.send(
-            JSON.stringify({
-              ...tournamentPlayersMessage(jsonResponse.tournamentId),
-              id: socketData.msgId,
-            }),
-            incrementMsgId
-          );
+            console.log('null')
         } else {
           if (tournamentState === "running") {
             const sortedPlayerData = processPlayersRunning(playerData);
@@ -148,21 +142,13 @@ const getTournamentData = (socketUrl) => {
             console.log(jsonResponse.players.length);
             console.log(playerData);
             const sortedPlayerData = processPlayersCompleted(playerData);
-            if (sortedPlayerData[0].position == 1) {
+            
               socketData.tournamentData[jsonResponse.tournamentId].results =
                 sortedPlayerData;
               socketData.tournamentData[
                 jsonResponse.tournamentId
               ].receivedPlayerData = true;
-            } else {
-              ws.send(
-                JSON.stringify({
-                  ...tournamentPlayersMessage(jsonResponse.tournamentId),
-                  id: socketData.msgId,
-                }),
-                incrementMsgId
-              );
-            }
+           
           }
         }
 
