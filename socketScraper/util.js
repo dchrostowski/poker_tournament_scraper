@@ -14,8 +14,93 @@ const insertCompleted = (tournamentResult) => {
     }
     else {
       console.log(`inserted results for completed tournament ${tournamentResult.tournamentName}`)
+      console.log("checking if running tournament exists...")
+      RunningTournament.findOne({uniqueId:tournamentResult.uniqueId}, (err,existing) => {
+        if(err) {
+          console.log("error when trying to find running tournament:")
+          console.error(err)
+        }
+        else {
+          if(existing) {
+            existing.deleteOne({uniqueId: tournamentResult.uniqueId}, (err) => {
+              if(err) {
+                console.log("error while trying to delete exisitng running tournament " + tournamentResult.uniqueId)
+                console.error(err)
+              }
+            })
+          }
+
+        }
+      })
     }
   })
+
+}
+
+// const updateRunning = (uniqueId,players) => {
+//   RunningTournament.findOne({uniqueId: uniqueId}, function(err,existing) {
+//     if(err) {
+//       console.log(err)
+//     }
+//     if(existing) {
+//       existing['players'] = players
+//       existing['lastUpdate'] = Date.now()
+//       existing.save(function(err) {
+//         if(err) {
+//           console.log(`error while inserting running ${site} tournament ${tournamentName}`)
+//           console.log(err)
+//         }
+//         else {
+//           console.log(`inserted running ${site} tournament ${tournamentName}`)
+//         }
+//       })
+//     }
+    
+
+//   })
+// }
+
+const insertRunning = (runningTournament) => {
+  runningTournament.save((err) => {
+    if(err) {
+      if(err.code === 11000) {
+        console.log(`duplicate running tournament ${runningTournament.tournamentName}; attepmting update`)
+        RunningTournament.findOne({uniqueId:runningTournament.uniqueId}, (err, existing) => {
+          if(err) {
+            console.log("unable to update running tournament with uid " + runningTournament.uniqueId)
+            console.error(err)
+          }
+          else {
+            if(existing) {
+              existing.players = runningTournament.players
+              existing.save((err) => {
+                if(err) {
+                  console.log("unable to update running tournament with uid " + runningTournament.uniqueId)
+                  console.error(err)
+                }
+                else {
+                  console.log(`successfully updated running tournament ${runningTournament.tournamentName} (${runningTournament.uniqueId})`)
+                }
+                
+              })
+            }
+          }
+        })
+
+      }
+      else {
+        console.error(err)
+      }
+      
+    }
+    else {
+      console.log(`inserted results for running tournament ${runningTournament.tournamentName}`)
+
+    }
+  })
+}
+
+const deleteRunning = (uid) => {
 
 }
 
@@ -44,9 +129,19 @@ const createTournamentResult = (data, config) => {
   const {site, currency} = config
 
   return new TournamentResult({
-    uniqueId, site, tournamentId, tournamentName, buyin, entryFee, bounty, startDate, endDate, bitcoinValue: null, currency
+    uniqueId, site, tournamentId, tournamentName, buyin, entryFee, bounty, startDate, endDate, bitcoinValue: null, currency, results
   })
 };
+
+const createRunningTournament = (data,config) => {
+  const {tournamentId, tournamentName, buyin,entryFee, bounty, startDate, endDate, results} = data
+  const uniqueId = `${config.tournamentIdPrefix}_${tournamentId}`
+  const {site, currency} = config
+  const lastUpdate = new Date().getTime()
+
+  return new RunningTournament({uniqueId, tournamentId, tournamentName, site, lastUpdate, players: results})
+
+}
 
 const TournamentDetail = (lobbyTournamentInfo) => {
   
@@ -55,9 +150,9 @@ const TournamentDetail = (lobbyTournamentInfo) => {
   const name = lobbyTournamentInfo.info.n;
   const startDate = lobbyTournamentInfo.info.sd;
   const endDate = state === "completed" ? lobbyTournamentInfo.info.le : null;
-  const buyIn = lobbyTournamentInfo.info.b / 100;
-  const entryFee = lobbyTournamentInfo.info.e / 100;
-  const bounty = lobbyTournamentInfo.info.bkv || 0;
+  const buyIn = (lobbyTournamentInfo.info.b || 0) / 100;
+  const entryFee = (lobbyTournamentInfo?.info?.e || 0) / 100;
+  const bounty = (lobbyTournamentInfo.info.bkv || 0) / 100;
 
   return {
     state: state,
@@ -151,7 +246,7 @@ const subscribeTournamentMessage = (tournamentId) => {
   return { tournamentId: tournamentId, t: "SubscribeTournament" };
 };
 
-const parsePlayerData = (playerDataResponse) => {
+const parsePlayerData = (playerDataResponse, tState) => {
   if (!playerDataResponse?.players || !playerDataResponse?.players[0]?.n)
     return null;
   const unsortedPlayers = playerDataResponse.players.map((player) => {
@@ -162,17 +257,25 @@ const parsePlayerData = (playerDataResponse) => {
     const nr = player?.nr || 1;
     const na = player?.na || 0;
 
-    return {
+
+
+    const pdata = {
       playerName: player.n,
       position: (player?.p || 0) + 1,
       prize1: ma / 100,
       prize2: bp / 100,
       totalPrize: (ma + bp) / 100,
-      addonRebuyTotal: (eb + rf) / 100,
+      
       numAddons: na,
       chips: player.c,
     };
+
+    if (tState === 'running') pdata['addonRebuyTotal'] = (eb + rf) / 100
+    else if (tState === 'completed') pData['numRebuys'] = nr
+
+    return pdata
   });
+
   return unsortedPlayers;
 };
 
@@ -236,5 +339,7 @@ module.exports = {
   processPlayersRunning,
   createTournamentResult,
   waitFor,
-  insertCompleted
+  insertCompleted,
+  createRunningTournament,
+  insertRunning
 };

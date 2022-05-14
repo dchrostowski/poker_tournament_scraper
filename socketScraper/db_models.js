@@ -8,6 +8,7 @@ const playerPosition = new Schema({
   prize2: { type: Number, default: 0 },
   totalPrize: { type: Number, required: true },
   addonRebuyTotal: { type: Number, required: false },
+  numRebuys: {type: Number, required: false},
   numAddons: { type: Number, required: false },
   chips: { type: Number, required: false },
 });

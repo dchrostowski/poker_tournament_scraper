@@ -2,4 +2,4 @@
 
 ls -al
 pwd
-node /home/pptruser/app/main.js & node /home/pptruser/app/main_running.js
+node /home/pptruser/app/main_socket.js

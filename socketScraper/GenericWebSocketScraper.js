@@ -14,7 +14,8 @@ const {
   subscribeTournamentMessage,
   processPlayersCompleted,
   processPlayersRunning,
-  createTournamentResult
+  createTournamentResult,
+  createRunningTournament
 } = require("./util");
 
 
@@ -24,6 +25,7 @@ const {
 const GenericWebSocketScraper = async (config, callback) => {
   const {socketUrl, site, tournamentIdPrefix, currency, cryptocurrency} = config
   const ws = new WebSocket(socketUrl);
+  console.log("Getting tournament data for " + config.site + "...")
 
   const socketData = {
     msgId: 1002,
@@ -70,7 +72,7 @@ const GenericWebSocketScraper = async (config, callback) => {
     const runningTournamentList = []
     const completedTournamentList = []
     socketData.runningIDs.forEach((tId) => {
-      runningTournamentData[tId] = socketData.tournamentData[tId]
+      runningTournamentData[tId] = createRunningTournament(socketData.tournamentData[tId], config)
       runningTournamentList.push(runningTournamentData[tId])
     })
 
@@ -126,7 +128,7 @@ const GenericWebSocketScraper = async (config, callback) => {
 
       messages.forEach((message, idx) => {
         setTimeout(() => {
-          console.log(`requesting data for tournament ID ${message.tournamentId}`);
+          //console.log(`requesting data for tournament ID ${message.tournamentId}`);
           ws.send(
             JSON.stringify({ ...message, id: socketData.msgId }),
             incrementMsgId
@@ -144,7 +146,7 @@ const GenericWebSocketScraper = async (config, callback) => {
 
     switch (jsonResponse.t) {
       case "TournamentPlayers":
-        console.log(`received player data for tournament ID ${jsonResponse.tournamentId}`)
+        //console.log(`received player data for tournament ID ${jsonResponse.tournamentId}`)
         
         const playerData = parsePlayerData(jsonResponse);
         
@@ -152,7 +154,7 @@ const GenericWebSocketScraper = async (config, callback) => {
           socketData.tournamentData[jsonResponse.tournamentId].state;
 
         if (playerData === null) {
-            console.log(`Failed to parse player data for tournament ID ${jsonResponse.tournamentId}`)
+            //console.log(`Failed to parse player data for tournament ID ${jsonResponse.tournamentId}`)
         } else {
           if (tournamentState === "running") {
             
@@ -180,10 +182,10 @@ const GenericWebSocketScraper = async (config, callback) => {
       case "LobbyTournamentInfo":
         const tDetail = parseLobbyTournamentInfo(jsonResponse);
         socketData.tournamentData[tDetail.tournamentId] = tDetail;
-        console.log(`received data for ${tDetail.state} tournament ${tDetail.tournamentName}`)
+        //console.log(`received data for ${tDetail.state} tournament ${tDetail.tournamentName}`)
         
         if (tDetail.state === "completed") {
-          console.log(`requesting player data for completed tournament ${tDetail.tournamentName}`);
+          //console.log(`requesting player data for completed tournament ${tDetail.tournamentName}`);
           socketData.completedIDs.push(tDetail.tournamentId);
           ws.send(
             JSON.stringify({
@@ -204,7 +206,7 @@ const GenericWebSocketScraper = async (config, callback) => {
         }
         if (tDetail.state === "running") {
           socketData.runningIDs.push(tDetail.tournamentId);
-          console.log(`requesting player data for running tournament ${tDetail.tournamentName}`);
+          //console.log(`requesting player data for running tournament ${tDetail.tournamentName}`);
           ws.send(
             JSON.stringify({
               ...subscribeTournamentMessage(tDetail.tournamentId),
@@ -225,7 +227,7 @@ const GenericWebSocketScraper = async (config, callback) => {
         break;
       case "TournamentsList":
         const tournamentList = parseTournamentList(jsonResponse);
-        console.log("Received list of tournaments");
+        //console.log("Received list of tournaments");
         if (tournamentList !== null) socketData.tournamentList = tournamentList;
         break;
       default:
@@ -234,7 +236,7 @@ const GenericWebSocketScraper = async (config, callback) => {
 
     if (isAuthorized(jsonResponse)) {
       if (socketData.tournamentList.length === 0) {
-        console.log("requesting list of tournaments...")
+        //console.log("requesting list of tournaments...")
         setTimeout(function timeout() {
           ws.send(
             JSON.stringify({
