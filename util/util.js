@@ -1,5 +1,6 @@
 const {Tournament, TournamentResult, RunningTournament, CryptocurrencyValue} = require('./db_models')
 
+
 class ScraperConfig {
   constructor({site,tournamentIdPrefix,cryptocurrency, currency, running}) {
       this.site = site

@@ -1,4 +1,24 @@
-const { PlayerPosition } = require("./db_models");
+const { PlayerPosition, TournamentResult, RunningTournament } = require("./db_models");
+
+
+const insertCompleted = (tournamentResult) => {
+  tournamentResult.save((err) => {
+    if(err) {
+      if(err.code === 11000) {
+        console.log(`duplicate tournament ${tournamentResult.tournamentName}; skipping`)
+      }
+      else {
+        console.error(err)
+      }
+      
+    }
+    else {
+      console.log(`inserted results for completed tournament ${tournamentResult.tournamentName}`)
+    }
+  })
+
+}
+
 
 const Tournament = (id, name) => {
   return {
@@ -7,9 +27,31 @@ const Tournament = (id, name) => {
   };
 };
 
+const waitFor = async (timeToWait) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve()
+    }, timeToWait)
+
+  })
+}
+
+
+const createTournamentResult = (data, config) => {
+  console.log("createTResult called")
+  const {tournamentId, tournamentName, buyin,entryFee, bounty, startDate, endDate, results } = data
+  const uniqueId = `${config.tournamentIdPrefix}_${tournamentId}`
+  const {site, currency} = config
+
+  return new TournamentResult({
+    uniqueId, site, tournamentId, tournamentName, buyin, entryFee, bounty, startDate, endDate, bitcoinValue: null, currency
+  })
+};
+
 const TournamentDetail = (lobbyTournamentInfo) => {
-  const state = getTournamentState(lobbyTournamentInfo);
+  
   const id = lobbyTournamentInfo.info.i;
+  const state = getTournamentState(lobbyTournamentInfo);
   const name = lobbyTournamentInfo.info.n;
   const startDate = lobbyTournamentInfo.info.sd;
   const endDate = state === "completed" ? lobbyTournamentInfo.info.le : null;
@@ -32,7 +74,6 @@ const TournamentDetail = (lobbyTournamentInfo) => {
 };
 
 const parseTournamentList = (data) => {
-  console.log("parse tournament list");
   if (data.tournaments[0]?.n) {
     return data.tournaments.map((item, idx) => {
       return Tournament(item.i, item.n);
@@ -127,7 +168,7 @@ const parsePlayerData = (playerDataResponse) => {
       prize1: ma / 100,
       prize2: bp / 100,
       totalPrize: (ma + bp) / 100,
-      numRebuys: nr - 1,
+      addonRebuyTotal: (eb + rf) / 100,
       numAddons: na,
       chips: player.c,
     };
@@ -193,4 +234,7 @@ module.exports = {
   subscribeTournamentMessage,
   processPlayersCompleted,
   processPlayersRunning,
+  createTournamentResult,
+  waitFor,
+  insertCompleted
 };

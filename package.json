@@ -1,16 +1,21 @@
 {
   "dependencies": {
+    "eslint": "^8.15.0",
     "mongoose": "^5.12.5",
-    "puppeteer": "^9.0.0"
+    "prettier": "^2.6.2",
+    "prettier-eslint": "^14.0.3",
+    "puppeteer": "^9.0.0",
+    "ws": "^8.6.0"
   },
-
   "scripts": {
     "start": "export $(cat host.env | xargs) && node main.js",
-    "start_running": "export $(cat host.env | xargs) && node main_running.js"
+    "start_running": "export $(cat host.env | xargs) && node main_running.js",
+    "start_socket": "export $(cat host.env | xargs) && node main_socket.js"
   },
-
-  "licenses": [{
-    "type": "MIT",
-    "url": "https://github.com/caolan/async/raw/master/LICENSE"
-  }]
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/caolan/async/raw/master/LICENSE"
+    }
+  ]
 }

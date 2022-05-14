@@ -9,7 +9,7 @@ const {
   ROUNDER_PASSWORD
 } = process.env;
 
-const GenericScraper = async (config) => {
+const GenericScraper = (config) => {
 
     const getUniqueId = (tournamentId) => {
       return `${config.tournamentIdPrefix}_${tournamentId}`

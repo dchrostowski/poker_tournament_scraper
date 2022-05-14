@@ -7,7 +7,7 @@ const playerPosition = new Schema({
   prize1: { type: Number, default: 0 },
   prize2: { type: Number, default: 0 },
   totalPrize: { type: Number, required: true },
-  numRebuys: { type: Number, required: false },
+  addonRebuyTotal: { type: Number, required: false },
   numAddons: { type: Number, required: false },
   chips: { type: Number, required: false },
 });
@@ -26,6 +26,7 @@ const tournamentResult = new Schema({
   tournamentName: { type: String, required: true },
   buyin: { type: Number, required: true },
   entryFee: { type: Number, required: true },
+  bounty: {type: Number, required: false },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   bitcoinValue: { type: Number, required: false },
