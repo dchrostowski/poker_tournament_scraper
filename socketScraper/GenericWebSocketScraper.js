@@ -147,11 +147,13 @@ const GenericWebSocketScraper = async (config, callback) => {
     switch (jsonResponse.t) {
       case "TournamentPlayers":
         //console.log(`received player data for tournament ID ${jsonResponse.tournamentId}`)
+        console.log('TOURNAMENT PLAYERS')
+        console.log(parsePlayerData)
         
-        const playerData = parsePlayerData(jsonResponse);
         
         const tournamentState =
           socketData.tournamentData[jsonResponse.tournamentId].state;
+          const playerData = parsePlayerData(jsonResponse, tournamentState);
 
         if (playerData === null) {
             //console.log(`Failed to parse player data for tournament ID ${jsonResponse.tournamentId}`)

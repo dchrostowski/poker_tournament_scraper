@@ -247,6 +247,7 @@ const subscribeTournamentMessage = (tournamentId) => {
 };
 
 const parsePlayerData = (playerDataResponse, tState) => {
+  
   if (!playerDataResponse?.players || !playerDataResponse?.players[0]?.n)
     return null;
   const unsortedPlayers = playerDataResponse.players.map((player) => {
@@ -271,7 +272,6 @@ const parsePlayerData = (playerDataResponse, tState) => {
     };
 
     if (tState === 'running') pdata['addonRebuyTotal'] = (eb + rf) / 100
-    else if (tState === 'completed') pData['numRebuys'] = nr
 
     return pdata
   });
@@ -281,7 +281,7 @@ const parsePlayerData = (playerDataResponse, tState) => {
 
 const processPlayersRunning = (unsortedPlayers) => {
   const dbUnsortedPlayers = unsortedPlayers.map((player) => {
-    return PlayerPosition({ ...player });
+    return new PlayerPosition({ ...player });
   });
 
   let eliminated = dbUnsortedPlayers.filter((player) => player.position > 0);
