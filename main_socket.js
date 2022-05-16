@@ -28,10 +28,6 @@ const rounderConfig = {
 
     configs.forEach((config) => {
       return GenericWebSocketScraper(config, (running,completed) => {
-      
-        console.log(running)
-        console.log(completed)
-        console.log('CALLBACK HERE')
   
         for(let i=0; i<completed.length; i++) {
           const result = completed[i]

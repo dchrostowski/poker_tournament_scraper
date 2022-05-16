@@ -22,6 +22,13 @@ const insertCompleted = (tournamentResult) => {
         }
         else {
           if(existing) {
+            tournamentResult.addonRebuyTotal = existing.addonRebuyTotal
+            tournamentResult.save((err) => {
+              console.error("unable to update completed tournament")
+              console.error(err)
+            })
+
+
             existing.deleteOne({uniqueId: tournamentResult.uniqueId}, (err) => {
               if(err) {
                 console.log("error while trying to delete exisitng running tournament " + tournamentResult.uniqueId)
