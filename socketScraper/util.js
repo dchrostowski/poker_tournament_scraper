@@ -74,7 +74,6 @@ const insertRunning = (runningTournament) => {
             if(existing) {
               existing.players = runningTournament.players
               existing.lastUpdate = new Date().getTime()
-              existing.
               existing.save((err) => {
                 if(err) {
                   console.log("unable to update running tournament with uid " + runningTournament.uniqueId)
