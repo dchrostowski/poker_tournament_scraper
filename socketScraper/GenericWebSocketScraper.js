@@ -45,7 +45,7 @@ const GenericWebSocketScraper = async (config, callback) => {
     }
     const now = new Date().getTime()
     const elapsed = now - socketData.start
-    if(elapsed > 120000) {
+    if(elapsed > 180000) {
       console.log("timeout occurred")
       callback([],[])
       socketData.complete = true
