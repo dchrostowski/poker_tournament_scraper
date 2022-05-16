@@ -36,9 +36,22 @@ const GenericWebSocketScraper = async (config, callback) => {
     runningIDs: [],
     authorized: false,
     complete: false,
+    start: new Date().getTime()
   };
 
   const isComplete = () => {
+    if(socketData.complete) {
+      return true
+    }
+    const now = new Date().getTime()
+    const elapsed = now - socketData.start
+    if(elapsed > 180000) {
+      console.log("timeout occurred")
+      callback([],[])
+      socketData.complete = true
+      return socketData.complete
+    }
+
     if (socketData.state !== "lobbyInfo") return false;
 
     if (socketData.state === "lobbyInfo") {
