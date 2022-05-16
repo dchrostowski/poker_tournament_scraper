@@ -21,11 +21,24 @@ const insertCompleted = (tournamentResult) => {
           console.error(err)
         }
         else {
+          const addonRebuyTotalMap = {}
           if(existing) {
-            tournamentResult.addonRebuyTotal = existing.addonRebuyTotal
+            existing.players.forEach((player) => {
+              addonRebuyTotalMap[player.playerName] = player.addonRebuyTotal
+            })
+
+            tournamentResult.results.forEach((player, idx) => {
+              tournamentResult.results[idx].addonRebuyTotal = addonRebuyTotalMap[player.playerName]
+            })
             tournamentResult.save((err) => {
-              console.error("unable to update completed tournament")
-              console.error(err)
+              if(err) {
+                console.error("unable to update completed tournament")
+                console.error(err)
+              }
+              else {
+                console.log("updated completed tournament")
+              }
+              
             })
 
 
@@ -274,7 +287,6 @@ const parsePlayerData = (playerDataResponse, tState) => {
       prize1: ma / 100,
       prize2: bp / 100,
       totalPrize: (ma + bp) / 100,
-      
       numAddons: na,
       chips: player.c,
     };
