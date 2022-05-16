@@ -99,6 +99,7 @@ const GenericWebSocketScraper = async (config, callback) => {
 
     fs.writeFile('./completed.json', JSON.stringify(completedTournamentData), err => console.error(err))
     callback(runningTournamentList, completedTournamentList)
+    socketData.complete = true
     return socketData.complete;
   };
 
@@ -160,8 +161,7 @@ const GenericWebSocketScraper = async (config, callback) => {
     switch (jsonResponse.t) {
       case "TournamentPlayers":
         //console.log(`received player data for tournament ID ${jsonResponse.tournamentId}`)
-        console.log('TOURNAMENT PLAYERS')
-        console.log(parsePlayerData)
+        
         
         
         const tournamentState =
