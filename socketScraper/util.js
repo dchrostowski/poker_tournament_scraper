@@ -24,11 +24,11 @@ const insertCompleted = (tournamentResult) => {
           const addonRebuyTotalMap = {}
           if(existing) {
             existing.players.forEach((player) => {
-              addonRebuyTotalMap[player.playerName] = player.addonRebuyTotal
+              addonRebuyTotalMap[player.playerName] = player.rebuyAmount
             })
 
             tournamentResult.results.forEach((player, idx) => {
-              tournamentResult.results[idx].addonRebuyTotal = addonRebuyTotalMap[player.playerName]
+              tournamentResult.results[idx].rebuyAmount = addonRebuyTotalMap[player.playerName]
             })
             tournamentResult.save((err) => {
               if(err) {
@@ -291,7 +291,7 @@ const parsePlayerData = (playerDataResponse, tState) => {
       chips: player.c,
     };
 
-    if (tState === 'running') pdata['addonRebuyTotal'] = (eb + rf) / 100
+    if (tState === 'running') pdata['rebuyAmount'] = (eb + rf) / 100
 
     return pdata
   });
