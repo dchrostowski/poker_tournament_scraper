@@ -142,7 +142,7 @@ const GenericWebSocketScraper = async (config, callback) => {
 
       messages.forEach((message, idx) => {
         setTimeout(() => {
-          //console.log(`requesting data for tournament ID ${message.tournamentId}`);
+          console.log(`requesting data for tournament ID ${message.tournamentId}`);
           ws.send(
             JSON.stringify({ ...message, id: socketData.msgId }),
             incrementMsgId
@@ -160,7 +160,7 @@ const GenericWebSocketScraper = async (config, callback) => {
 
     switch (jsonResponse.t) {
       case "TournamentPlayers":
-        //console.log(`received player data for tournament ID ${jsonResponse.tournamentId}`)
+        console.log(`received player data for tournament ID ${jsonResponse.tournamentId}`)
         
         
         
@@ -169,7 +169,7 @@ const GenericWebSocketScraper = async (config, callback) => {
           const playerData = parsePlayerData(jsonResponse, tournamentState);
 
         if (playerData === null) {
-            //console.log(`Failed to parse player data for tournament ID ${jsonResponse.tournamentId}`)
+            console.log(`Failed to parse player data for tournament ID ${jsonResponse.tournamentId}`)
         } else {
           if (tournamentState === "running") {
             
@@ -197,10 +197,10 @@ const GenericWebSocketScraper = async (config, callback) => {
       case "LobbyTournamentInfo":
         const tDetail = parseLobbyTournamentInfo(jsonResponse);
         socketData.tournamentData[tDetail.tournamentId] = tDetail;
-        //console.log(`received data for ${tDetail.state} tournament ${tDetail.tournamentName}`)
+        console.log(`received data for ${tDetail.state} tournament ${tDetail.tournamentName}`)
         
         if (tDetail.state === "completed") {
-          //console.log(`requesting player data for completed tournament ${tDetail.tournamentName}`);
+          console.log(`requesting player data for completed tournament ${tDetail.tournamentName}`);
           socketData.completedIDs.push(tDetail.tournamentId);
           ws.send(
             JSON.stringify({
@@ -221,7 +221,7 @@ const GenericWebSocketScraper = async (config, callback) => {
         }
         if (tDetail.state === "running") {
           socketData.runningIDs.push(tDetail.tournamentId);
-          //console.log(`requesting player data for running tournament ${tDetail.tournamentName}`);
+          console.log(`requesting player data for running tournament ${tDetail.tournamentName}`);
           ws.send(
             JSON.stringify({
               ...subscribeTournamentMessage(tDetail.tournamentId),

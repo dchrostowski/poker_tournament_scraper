@@ -192,8 +192,8 @@ const TournamentDetail = (lobbyTournamentInfo) => {
 const parseTournamentList = (data) => {
   if (data.tournaments[0]?.n) {
     return data.tournaments.map((item, idx) => {
-      return Tournament(item.i, item.n);
-    });
+        return Tournament(item.i, item.n);
+    }).filter(tournament => tournament.tournamentId && tournament.tournamentName);
   }
   return null;
 };
