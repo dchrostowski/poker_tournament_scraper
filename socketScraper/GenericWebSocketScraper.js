@@ -28,7 +28,7 @@ const GenericWebSocketScraper = async (config, callback) => {
   console.log("Getting tournament data for " + config.site + "...")
 
   const socketData = {
-    msgId: 1002,
+    msgId: 1001,
     tournamentList: [],
     state: "init",
     tournamentData: {},
@@ -51,15 +51,22 @@ const GenericWebSocketScraper = async (config, callback) => {
       socketData.complete = true
       return socketData.complete
     }
+    console.log("isCopmlete1")
+    console.log(socketData.state)
+
+    
 
     if (socketData.state !== "lobbyInfo") return false;
-
+    
+    
     if (socketData.state === "lobbyInfo") {
       if (socketData.tournamentList.length === 0) return false;
+      console.log(1)
       if (socketData.complete) return true;
       for (let i = 0; i < socketData.tournamentList.length; i++) {
         let tId = socketData.tournamentList[i].tournamentId;
         if (!socketData.tournamentData.hasOwnProperty(tId)) {
+          console.log(`missing tournament id ${tId}`)
           return false;
         }
       }
@@ -115,7 +122,11 @@ const GenericWebSocketScraper = async (config, callback) => {
 
   ws.on("open", function open() {
     console.log("connected");
-    ws.send(JSON.stringify(initialMessage(socketData.msgId)), incrementMsgId);
+    setTimeout(() => {
+      ws.send(JSON.stringify(initialMessage(socketData.msgId)), incrementMsgId);
+
+    }, 2000)
+    
   });
 
   const ping = setInterval(() => {
@@ -134,11 +145,13 @@ const GenericWebSocketScraper = async (config, callback) => {
 
   ws.on("message", function message(data) {
     if (socketData.tournamentList.length > 0 && socketData.state === "init") {
-      socketData.state = "lobbyInfo";
-      console.log("entered lobbyInfo state");
+      socketData.state = 'lobbyInfo'
+      
       const messages = generateLobbyTournamentInfoMessages(
         socketData.tournamentList
       );
+      console.log("messages:")
+      console.log(messages)
 
       messages.forEach((message, idx) => {
         setTimeout(() => {
@@ -160,7 +173,7 @@ const GenericWebSocketScraper = async (config, callback) => {
 
     switch (jsonResponse.t) {
       case "TournamentPlayers":
-        //console.log(`received player data for tournament ID ${jsonResponse.tournamentId}`)
+        console.log(`received player data for tournament ID ${jsonResponse.tournamentId}`)
         
         
         
@@ -195,12 +208,14 @@ const GenericWebSocketScraper = async (config, callback) => {
 
         break;
       case "LobbyTournamentInfo":
+        console.log("got lobby tournament info")
         const tDetail = parseLobbyTournamentInfo(jsonResponse);
         socketData.tournamentData[tDetail.tournamentId] = tDetail;
         //console.log(`received data for ${tDetail.state} tournament ${tDetail.tournamentName}`)
+        //console.log(tDetail.state)
         
         if (tDetail.state === "completed") {
-          //console.log(`requesting player data for completed tournament ${tDetail.tournamentName}`);
+          console.log(`requesting player data for completed tournament ${tDetail.tournamentName}`);
           socketData.completedIDs.push(tDetail.tournamentId);
           ws.send(
             JSON.stringify({
@@ -221,7 +236,7 @@ const GenericWebSocketScraper = async (config, callback) => {
         }
         if (tDetail.state === "running") {
           socketData.runningIDs.push(tDetail.tournamentId);
-          //console.log(`requesting player data for running tournament ${tDetail.tournamentName}`);
+          console.log(`requesting player data for running tournament ${tDetail.tournamentName}`);
           ws.send(
             JSON.stringify({
               ...subscribeTournamentMessage(tDetail.tournamentId),
@@ -242,24 +257,35 @@ const GenericWebSocketScraper = async (config, callback) => {
         break;
       case "TournamentsList":
         const tournamentList = parseTournamentList(jsonResponse);
-        //console.log("Received list of tournaments");
+        
         if (tournamentList !== null) socketData.tournamentList = tournamentList;
+        console.log(tournamentList)
+        console.log('-=---------------------------------------')
         break;
+
       default:
         console.log(`got unhandled |${jsonResponse.t}| message `);
     }
 
     if (isAuthorized(jsonResponse)) {
-      if (socketData.tournamentList.length === 0) {
+      if (socketData.tournamentList.length === 0 && socketData.state === 'lobbyInfo1') {
         //console.log("requesting list of tournaments...")
+        socketData.state = 'lobbyInfo2'
         setTimeout(function timeout() {
-          ws.send(
-            JSON.stringify({
-              ...tournamentListMessage(),
-              id: socketData.msgId,
-            }),
-            incrementMsgId
-          );
+          
+          
+          
+          if(socketData.state === 'init') {
+            ws.send(
+              JSON.stringify({
+                ...tournamentListMessage(),
+                id: socketData.msgId,
+              }),
+              () => { console.log("sent list message"); incrementMsgId(); socketData.state = "lobbyInfo1" }
+            );
+
+          }
+          
         }, 2000);
       }
     }

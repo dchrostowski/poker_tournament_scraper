@@ -62,4 +62,4 @@ const rounderConfig = {
 
   }
 
-  run([rounderConfig,stockConfig])
+  run([stockConfig,rounderConfig])
