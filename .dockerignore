@@ -5,4 +5,3 @@ Dockerfile
 .git
 README.md
 .gitignore
-.env

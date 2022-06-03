@@ -18,24 +18,22 @@ services:
   scrapers:
     depends_on:
       - mongo
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
-    security_opt:
-      - seccomp=./chrome.json
     image: node:12-slim
     container_name: scrapers
     restart: unless-stopped
     env_file: .env
-    environment: 
+    environment:
       - MONGO_USERNAME=$MONGO_USERNAME
       - MONGO_PASSWORD=$MONGO_PASSWORD
       - MONGO_HOSTNAME=mongo
       - MONGO_PORT=$MONGO_PORT
       - MONGO_DB=$MONGO_DB
     volumes:
-      - .:/home/pptruser/app
-    command: ["/home/pptruser/app/start_scraper.sh"]
+      - .:/app
+    command: ["/app/start_scraper.sh"]
     networks: 
       - scraper-network
 
@@ -46,4 +44,3 @@ networks:
 volumes:
   node_modules:
   dbdata:
-

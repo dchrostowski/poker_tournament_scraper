@@ -1,50 +1,66 @@
-const {SWCScraper} = require('./scrapers/SealsWithClubs')
-const { GenericScraper } = require('./scrapers/GenericScraper')
-const { CoinMarketCapScraper } = require('./scrapers/CoinMarketCapScraper')
-const {ScraperConfig, insertCryptoRecord} = require('./util/util')
+const {
+  GenericWebSocketScraper
+} = require("./socket_scraper/GenericWebSocketScraper");
+const { getDBConnection } = require("./socket_scraper/db");
+const {
+  insertCompleted,
+  insertRunning,
+  insertRegistering,
+  pruneRegistering
+} = require("./socket_scraper/util");
+getDBConnection();
 
-const runContinuously = async function () {
+//console.log(db)
 
-    
+const rounderConfig = {
+  site: "roundercasino.com",
+  tournamentIdPrefix: "RC",
+  currency: "USD",
+  cryptocurrency: null,
+  socketUrl: "wss://web.latpoker.com/front"
+};
 
-    const stockPokerConfig = new ScraperConfig({
-      site:'stockpokeronline.com', 
-      tournamentIdPrefix:'SPO', 
-      currency: 'USD',
-      running: false,
-      cryptocurrency: null
-    })
+const stockConfig = {
+  site: "stockpokeronline.com",
+  tournamentIdPrefix: "SPO",
+  currency: "USD",
+  cryptocurrency: null,
+  socketUrl: "wss://web.stockpokeronline.com/front"
+};
 
-    const rounderCasinoConfig = new ScraperConfig({
-      site:'roundercasino.com',
-      tournamentIdPrefix:'RC',
-      currency: "USD",
-      cryptocurrency: null,
-      running: false
-    })
-
-    const swcConfig = new ScraperConfig({
-      site: 'swcpoker.club',
-      tournamentPrefix: 'SWC',
-      currency: 'USD',
-      running: false,
-      cryptocurrency: null
-
-    })
-  
-    while (true) {
-      const cryptoVals = await CoinMarketCapScraper()
-
-      
-      stockPokerConfig.cryptocurrency = cryptoVals
-      rounderCasinoConfig.cryptocurrency = cryptoVals
-      swcConfig.cryptocurrency = cryptoVals
-
-      await GenericScraper(stockPokerConfig)
-      await GenericScraper(rounderCasinoConfig)
-      //await SWCScraper(swcConfig)
-      Object.keys(cryptoVals).forEach(key => insertCryptoRecord(cryptoVals[key]))
+const insertData = tournament => {
+  switch (tournament.tournamentState.tournamentState) {
+    case "running": {
+      insertRunning(tournament);
+      break;
+    }
+    case "registering": {
+      insertRegistering(tournament);
+      break;
+    }
+    case "completed": {
+      insertCompleted(tournament);
+      break;
     }
   }
 
-runContinuously()
+  pruneRegistering(300000);
+};
+
+const run = configs => {
+  configs.forEach(config => {
+    return GenericWebSocketScraper(config, function(tournaments) {
+      try {
+        tournaments.forEach(tournament => {
+          insertData(tournament);
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        return run([config]);
+      }
+    });
+  });
+};
+
+run([stockConfig, rounderConfig]);
