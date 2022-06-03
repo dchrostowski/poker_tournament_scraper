@@ -13,28 +13,6 @@ const playerPosition = new Schema({
   chips: { type: Number, required: false }
 })
 
-const tournamentState = new Schema({
-  tournamentState: {
-    type: String,
-    enum: [
-      "completed",
-      "running",
-      "registering",
-      "seating",
-      "announced",
-      "cancelled",
-      "unfinished"
-    ]
-  }
-})
-
-const tournamentType = new Schema({
-  tournamentType: {
-    type: String,
-    enum: ["scheduled", "sit-and-go", "manual"]
-  }
-})
-
 const cryptocurrencyValue = new Schema({
   name: { type: String, required: true },
   abbreviation: { type: String, required: true },
@@ -47,8 +25,8 @@ const tournamentResult = new Schema({
   site: { type: String, required: true },
   tournamentId: { type: Number, required: true },
   tournamentName: { type: String, required: true },
-  tournamentState: { type: tournamentState },
-  tournamentType: { type: tournamentType },
+  tournamentState: { type: String, required: true },
+  tournamentType: { type: String, required: true },
   buyin: { type: Number, required: true },
   entryFee: { type: Number, required: true },
   bounty: { type: Number, required: false },
@@ -62,8 +40,8 @@ const tournamentResult = new Schema({
 const runningTournament = new Schema({
   uniqueId: { type: String, required: true, unique: true },
   tournamentId: { type: Number, required: true },
-  tournamentState: { type: tournamentState, required: true },
-  tournamentType: { type: tournamentType, required: true },
+  tournamentState: { type: String, required: true },
+  tournamentType: { type: String, required: true },
   tournamentName: { type: String, required: true },
   site: { type: String, required: true },
   lastUpdate: { type: Date, required: true },
@@ -73,8 +51,8 @@ const runningTournament = new Schema({
 const registeringTournament = new Schema({
   uniqueId: { type: String, required: true, unique: true },
   tournamentId: { type: Number, required: true },
-  tournamentState: { type: tournamentState, required: true },
-  tournamentType: { type: tournamentType, required: true },
+  tournamentState: { type: String, required: true },
+  tournamentType: { type: String, required: true },
   tournamentName: { type: String, required: true },
   site: { type: String, required: true },
   lastUpdate: { type: Date, required: true },
@@ -82,9 +60,9 @@ const registeringTournament = new Schema({
 })
 
 const TournamentResult = mongoose.model("TournamentResult", tournamentResult)
-
 const PlayerPosition = mongoose.model("PlayerPosition", playerPosition)
 const RunningTournament = mongoose.model("RunningTournament", runningTournament)
+
 const RegisteringTournament = mongoose.model(
   "RegisteringTournament",
   registeringTournament
@@ -94,15 +72,10 @@ const CryptocurrencyValue = mongoose.model(
   cryptocurrencyValue
 )
 
-const TournamentState = mongoose.model("TournamentState", tournamentState)
-const TournamentType = mongoose.model("TournamentType", tournamentType)
-
 module.exports = {
   TournamentResult,
   PlayerPosition,
   RunningTournament,
   CryptocurrencyValue,
-  RegisteringTournament,
-  TournamentState,
-  TournamentType
+  RegisteringTournament
 }

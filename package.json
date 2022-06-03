@@ -7,8 +7,7 @@
     "ws": "^8.6.0"
   },
   "scripts": {
-    "start": "export $(cat host.env | xargs) && node main.js",
-    "start_socket": "export $(cat host.env | xargs) && node main_socket.js"
+    "start": "export $(cat host.env | xargs) && node main.js"
   },
   "licenses": [
     {

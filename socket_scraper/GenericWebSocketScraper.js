@@ -109,6 +109,7 @@ const GenericWebSocketScraper = async (config, callback) => {
   }
 
   const isComplete = () => {
+    console.log(1)
     if (socketData.complete) {
       return true
     }
@@ -121,12 +122,15 @@ const GenericWebSocketScraper = async (config, callback) => {
       socketData.complete = true
       return socketData.complete
     }
+    console.log(2)
 
     if (socketData.state !== "lobbyInfo" && socketData.state !== "playerData")
       return false
 
     if (socketData.state === "lobbyInfo") {
+      console.log(3)
       if (socketData.tournamentList.length === 0) return false
+      console.log(4)
 
       if (socketData.complete) return true
       for (let i = 0; i < socketData.tournamentList.length; i++) {
@@ -152,11 +156,11 @@ const GenericWebSocketScraper = async (config, callback) => {
     for (let i = 0; i < runningAndCompletedIds.length; i++) {
       let tId = runningAndCompletedIds[i]
       if (!socketData.tournamentData[tId].receivedPlayerData) {
-        console.log(
-          `missing player data for ${tId} - ${
-            socketData.tournamentNames[tId]
-          } - type ${socketData.tournamentData[tId].tournamentType}`
-        )
+        // console.log(
+        //   `missing player data for ${tId} - ${
+        //     socketData.tournamentNames[tId]
+        //   } - type ${socketData.tournamentData[tId].tournamentType}`
+        // )
         return false
       }
     }

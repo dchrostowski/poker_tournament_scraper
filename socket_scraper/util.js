@@ -2,9 +2,7 @@ const {
   PlayerPosition,
   TournamentResult,
   RunningTournament,
-  RegisteringTournament,
-  TournamentState,
-  TournamentType
+  RegisteringTournament
 } = require("./db_models")
 
 const insertCompleted = tournamentResult => {
@@ -238,8 +236,8 @@ const createTournamentResult = (data, config) => {
     site,
     tournamentId,
     tournamentName,
-    tournamentState: new TournamentState({ tournamentState }),
-    tournamentType: new TournamentType({ tournamentType }),
+    tournamentState: tournamentState,
+    tournamentType: tournamentType,
     buyin,
     entryFee,
     bounty,
@@ -272,8 +270,8 @@ const createRunningTournament = (data, config) => {
     uniqueId,
     tournamentId,
     tournamentName,
-    tournamentState: new TournamentState({ tournamentState }),
-    tournamentType: new TournamentType({ tournamentType }),
+    tournamentState,
+    tournamentType,
     site,
     lastUpdate,
     players: results
@@ -303,8 +301,8 @@ const createRegisteringTournament = (data, config) => {
     tournamentName,
     site,
     lastUpdate,
-    tournamentState: new TournamentState({ tournamentState }),
-    tournamentType: new TournamentType({ tournamentType }),
+    tournamentState,
+    tournamentType,
     players: results
   })
 }
@@ -322,7 +320,7 @@ const TournamentDetail = lobbyTournamentInfo => {
   const bounty = (lobbyTournamentInfo.info.bkv || 0) / 100
 
   return {
-    tournamentState: state,
+    tournamentState: tournamentState,
     tournamentType: tournamentType,
     tournamentId: id,
     tournamentName: name,

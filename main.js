@@ -1,14 +1,14 @@
 const {
   GenericWebSocketScraper
-} = require("./socket_scraper/GenericWebSocketScraper");
-const { getDBConnection } = require("./socket_scraper/db");
+} = require("./socket_scraper/GenericWebSocketScraper")
+const { getDBConnection } = require("./socket_scraper/db")
 const {
   insertCompleted,
   insertRunning,
   insertRegistering,
   pruneRegistering
-} = require("./socket_scraper/util");
-getDBConnection();
+} = require("./socket_scraper/util")
+getDBConnection()
 
 //console.log(db)
 
@@ -18,7 +18,7 @@ const rounderConfig = {
   currency: "USD",
   cryptocurrency: null,
   socketUrl: "wss://web.latpoker.com/front"
-};
+}
 
 const stockConfig = {
   site: "stockpokeronline.com",
@@ -26,41 +26,41 @@ const stockConfig = {
   currency: "USD",
   cryptocurrency: null,
   socketUrl: "wss://web.stockpokeronline.com/front"
-};
+}
 
 const insertData = tournament => {
-  switch (tournament.tournamentState.tournamentState) {
+  switch (tournament.tournamentState) {
     case "running": {
-      insertRunning(tournament);
-      break;
+      insertRunning(tournament)
+      break
     }
     case "registering": {
-      insertRegistering(tournament);
-      break;
+      insertRegistering(tournament)
+      break
     }
     case "completed": {
-      insertCompleted(tournament);
-      break;
+      insertCompleted(tournament)
+      break
     }
   }
 
-  pruneRegistering(300000);
-};
+  pruneRegistering(300000)
+}
 
 const run = configs => {
   configs.forEach(config => {
     return GenericWebSocketScraper(config, function(tournaments) {
       try {
         tournaments.forEach(tournament => {
-          insertData(tournament);
-        });
+          insertData(tournament)
+        })
       } catch (err) {
-        console.error(err);
+        console.error(err)
       } finally {
-        return run([config]);
+        //return run([config])
       }
-    });
-  });
-};
+    })
+  })
+}
 
-run([stockConfig, rounderConfig]);
+run([stockConfig, rounderConfig])
