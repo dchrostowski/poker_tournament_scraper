@@ -81,6 +81,6 @@ export async function insertComplete(record) {
     }
     catch (error) {
         console.error(error)
-        throw error
+        
     }
 }
