@@ -7,6 +7,7 @@ import {
 } from "./db_models.js"
 import { getDBConnection } from "./db.js"
 import { insertComplete, insertIncomplete } from "./db_operations.js"
+import { execPath } from "process"
 
 const runScraper = async (config) => {
     console.log("starting scraper for " + config.site)
@@ -87,7 +88,14 @@ const runScraper = async (config) => {
             results: results
         }
 
-        insertComplete(TournamentResult(completedTournamentArgs))
+        try{
+          insertComplete(TournamentResult(completedTournamentArgs))
+        }
+        catch(err) {
+          console.log(err)
+        }
+
+        
 
     }
 
