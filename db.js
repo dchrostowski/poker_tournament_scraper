@@ -1,5 +1,5 @@
-const mongoose = require("mongoose")
-const { waitFor } = require("./util")
+import mongoose from 'mongoose'
+
 
 const {
   MONGO_USERNAME,
@@ -12,9 +12,14 @@ const {
 const url = `mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOSTNAME}:${MONGO_PORT}/${MONGO_DB}?authSource=admin`
 console.log(url)
 
-console.log(url)
-let connection
-async function getDBConnection() {
+const waitFor = async timeToWait => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve()
+    }, timeToWait)
+  })
+}
+export async function getDBConnection() {
   await waitFor(2000)
   try {
     return await mongoose.connect(url, { useNewUrlParser: true })
@@ -25,6 +30,15 @@ async function getDBConnection() {
   }
 }
 
-//return doConnect()
 
-module.exports = { getDBConnection }
+
+
+
+
+
+
+
+
+
+
+
