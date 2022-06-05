@@ -158,39 +158,4 @@ class WebSocketScraper {
   }
 }
 
-
-
-
-
-
-
-
-
-
-// start = () => {
-
-
-
-
-
-
-
-
-
-//   this.ws.on("close", function close(code, reason) {
-//     console.log(`${code}: ${reason.toString()}`)
-//     console.log("websocket disconnected")
-//     //clearInterval(ping)
-//   })
-
-
-
-
-
-
-
-
-
-
-
 export default WebSocketScraper
