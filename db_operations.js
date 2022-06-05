@@ -27,7 +27,6 @@ export async function insertIncomplete(record) {
     }
     catch (error) {
         console.error(error)
-        throw error
     }
 
 }
@@ -68,7 +67,7 @@ export async function insertComplete(record) {
 
         const existing = await TournamentResult.findOne({ uniqueId: record.uniqueId })
         if (existing) {
-            console.log("skipping update for " + ${ rid })
+            console.log("skipping update for " + rid )
 
         }
         else {
