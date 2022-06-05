@@ -21,9 +21,6 @@ const runScraper = async (config) => {
     const registeringList = tournamentList.filter(t => t.state === 'registering' && t.type !== 'sit-and-go')
     const completedList = tournamentList.filter(t => t.state === 'completed' && t.type !== 'sit-and-go')
 
-
-
-
     for (let i = 0; i < runningList.length; i++) {
         const t = runningList[i]
         const lti = await scraper.getLobbyTournamentInfo(t.id)
@@ -43,9 +40,7 @@ const runScraper = async (config) => {
         }
 
         insertIncomplete(RunningTournament(runningTournamentArgs))
-
     }
-
 
     for (let i = 0; i < registeringList.length; i++) {
         const t = registeringList[i]
@@ -101,11 +96,6 @@ const runScraper = async (config) => {
 
 }
 
-
-
-
-
-
 const rounderConfig = {
     site: "roundercasino.com",
     tournamentIdPrefix: "RC",
@@ -128,12 +118,8 @@ async function start() {
     let i = 1
     while (true) {
         console.log("run # " + i)
-        console.log("starting stock")
         await runScraper(stockConfig)
-        console.log("emdomg stock")
-        console.log("starting rounder")
         await runScraper(rounderConfig)
-        console.log("ending rounder")
         i++
     }
 
