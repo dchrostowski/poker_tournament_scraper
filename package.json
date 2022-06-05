@@ -1,16 +1,16 @@
 {
+  "name": "ls",
+  "version": "1.0.0",
+  "description": "poker scraper",
+  "main": "main.js",
+  "license": "MIT",
+  "type": "module",
   "dependencies": {
-    "mongoose": "^5.12.5",
-    "puppeteer": "^9.0.0"
+    "mongoose": "^6.3.5",
+    "ws": "^8.7.0"
   },
-
   "scripts": {
     "start": "export $(cat host.env | xargs) && node main.js",
-    "start_running": "export $(cat host.env | xargs) && node main_running.js"
-  },
-
-  "licenses": [{
-    "type": "MIT",
-    "url": "https://github.com/caolan/async/raw/master/LICENSE"
-  }]
+    "docker": "export $(cat .env | xargs) && node main.js"
+  }
 }
