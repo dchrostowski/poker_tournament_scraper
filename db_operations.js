@@ -10,27 +10,20 @@ export async function insertIncomplete(record) {
     const rid = ri(record)
     try {
         const model = record.tournamentState === 'running' ? RunningTournament : RegisteringTournament
-        const existing = await model.findOne({ uniqueId: record.uniqueId })
+        console.log(model)
+        await model.findOneAndUpdate({ uniqueId: record.uniqueId },record, {
+            upsert: true
+        } )
 
-        if (existing) {
-            console.log("udpating " + rid)
-            existing.lastUpdate = record.lastUpdate
-            existing.players = record.players
-            await existing.save()
-
-        }
-        else {
-            console.log("inserting " + rid)
-            await record.save()
-        }
+    console.log(`upserted ${rid}`)
 
     }
     catch (error) {
         console.error(error)
+        throw error
     }
 
 }
-
 function generatePlayerRebuyAmountMap(existing) {
     const rebuyMap = {}
     for (let i = 0; i < existing.players.length; i++) {
@@ -65,16 +58,9 @@ export async function insertComplete(record) {
 
         }
 
-        const existing = await TournamentResult.findOne({ uniqueId: record.uniqueId })
-        if (existing) {
-            console.log("skipping update for " + rid )
-
-        }
-        else {
-            await record.save()
-            console.log(`insert ${rid}`)
-
-        }
+        await TournamentResult.findOneAndUpdate({ uniqueId: record.uniqueId }, record, {
+            upsert:true
+        })
 
         pruneRegisteringAndRunning(900000)
     }

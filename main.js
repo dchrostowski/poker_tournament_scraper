@@ -34,13 +34,14 @@ const runScraper = async (config) => {
             tournamentName: lti.name,
             tournamentState: lti.state,
             tournamentType: lti.type,
+            startDate: lti.startDate,
             startingChips: lti.startingChips,
             site: config.site,
             lastUpdate: new Date(),
             players: results,
         }
 
-        insertIncomplete(RunningTournament(runningTournamentArgs))
+        insertIncomplete(runningTournamentArgs)
     }
 
     for (let i = 0; i < registeringList.length; i++) {
@@ -56,12 +57,13 @@ const runScraper = async (config) => {
             tournamentState: lti.state,
             tournamentType: lti.type,
             startingChips: lti.startingChips,
+            startDate: lti.startDate,
             site: config.site,
             lastUpdate: new Date(),
             players: results,
         }
 
-        insertIncomplete(RegisteringTournament(regTournamentArgs))
+        insertIncomplete(regTournamentArgs)
     }
 
     for (let i = 0; i < completedList.length; i++) {
@@ -89,7 +91,7 @@ const runScraper = async (config) => {
         }
 
         try{
-          insertComplete(TournamentResult(completedTournamentArgs))
+          insertComplete(completedTournamentArgs)
         }
         catch(err) {
           console.log(err)

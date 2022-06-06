@@ -125,6 +125,7 @@ class WebSocketScraper {
       const check = () => {
         if (this.responses[msgId]) {
           const lobbyTournInfo = parseLobbyTournamentInfo(this.responses[msgId])
+          console.log(lobbyTournInfo.startDate)
           return resolve(lobbyTournInfo)
         }
         setTimeout(check, 50)

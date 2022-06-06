@@ -44,6 +44,7 @@ const runningTournament = new Schema({
     tournamentType: { type: String, required: true },
     tournamentName: { type: String, required: true },
     startingChips: { type: Number, required: true },
+    startDate: {type: Date, required: false},
     site: { type: String, required: true },
     lastUpdate: { type: Date, required: true },
     players: { type: [playerPosition], required: true }
