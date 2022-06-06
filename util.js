@@ -27,17 +27,19 @@ class Tournament {
 }
 
 class LobbyTournamentInfo {
+    
     constructor(info) {
         this.id = info.i
         this.name = info.n
         this.state = stateMap[info.s]
         this.type = typeMap[info.tt]
-        this.startDate = info?.sd
-        this.endDate = info?.le || null
+        this.startDate = info?.sd ? new Date(info.sd + " UTC") : null
+        this.endDate = info?.le ? new Date(info.le + " UTC") : null
         this.buyIn = (info?.b || 0) / 100
         this.entryFee = (info?.e || 0) / 100
         this.bounty = (info?.bkv || 0) / 100
         this.startingChips = info.sf
+        
 
     }
 }
@@ -51,7 +53,7 @@ export function parseTournamentList(response) {
 }
 
 export function parseLobbyTournamentInfo(resp) {
-    console.log("parsing lobby tournament info...")
+    
     return new LobbyTournamentInfo(resp.info)
 }
 

@@ -6,8 +6,7 @@ import {
     RegisteringTournament
 } from "./db_models.js"
 import { getDBConnection } from "./db.js"
-import { insertComplete, insertIncomplete } from "./db_operations.js"
-import { execPath } from "process"
+import { insertRunningOrReg, insertComplete } from "./db_operations.js"
 
 const runScraper = async (config) => {
     console.log("starting scraper for " + config.site)
@@ -34,13 +33,14 @@ const runScraper = async (config) => {
             tournamentName: lti.name,
             tournamentState: lti.state,
             tournamentType: lti.type,
+            startDate: lti.startDate,
             startingChips: lti.startingChips,
             site: config.site,
             lastUpdate: new Date(),
             players: results,
         }
 
-        insertIncomplete(RunningTournament(runningTournamentArgs))
+        insertRunningOrReg(RunningTournament(runningTournamentArgs))
     }
 
     for (let i = 0; i < registeringList.length; i++) {
@@ -56,12 +56,13 @@ const runScraper = async (config) => {
             tournamentState: lti.state,
             tournamentType: lti.type,
             startingChips: lti.startingChips,
+            startDate: lti.startDate,
             site: config.site,
             lastUpdate: new Date(),
             players: results,
         }
 
-        insertIncomplete(RegisteringTournament(regTournamentArgs))
+        insertRunningOrReg(RegisteringTournament(regTournamentArgs))
     }
 
     for (let i = 0; i < completedList.length; i++) {

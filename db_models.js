@@ -44,6 +44,7 @@ const runningTournament = new Schema({
     tournamentType: { type: String, required: true },
     tournamentName: { type: String, required: true },
     startingChips: { type: Number, required: true },
+    startDate: {type: Date, required: false},
     site: { type: String, required: true },
     lastUpdate: { type: Date, required: true },
     players: { type: [playerPosition], required: true }
@@ -56,6 +57,7 @@ const registeringTournament = new Schema({
     tournamentType: { type: String, required: true },
     tournamentName: { type: String, required: true },
     startingChips: { type: Number, required: true },
+    startDate: {type: Date, required: false},
     site: { type: String, required: true },
     lastUpdate: { type: Date, required: true },
     players: { type: [playerPosition], required: false }
@@ -64,6 +66,7 @@ const registeringTournament = new Schema({
 export const TournamentResult = mongoose.model("TournamentResult", tournamentResult)
 export const PlayerPosition = mongoose.model("PlayerPosition", playerPosition)
 export const RunningTournament = mongoose.model("RunningTournament", runningTournament)
+export const RunningTournamentArchive = mongoose.model('RunningTournamentArchive',runningTournament)
 
 export const RegisteringTournament = mongoose.model(
     "RegisteringTournament",
