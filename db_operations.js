@@ -57,7 +57,7 @@ export function createNewPlayerSetWithRebuyValues(oldTournamentResult, existingR
     })
     const newSet = oldTournamentResult.results.map((player) => {
         console.log(`set ${player.playerName} rebuy amount to ${namesToRebuys[player.playerName]}`)
-        player.rebuyAmount = namesToRebuys[player.playerName]
+        player.rebuyAmount = namesToRebuys[player.playerName] || 0
 
         return player
     })
