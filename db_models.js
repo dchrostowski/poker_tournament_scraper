@@ -9,7 +9,8 @@ const player = new Schema({
     playerGivenName: {type:String, required:false},
     playerSurname: {type: String, required: false},
     site: {type: String, required: true},
-    lastActive: {type: Date, required: true}
+    lastActive: {type: Date, required: true},
+    country: {type: String, required: false}
 })
 
 const playerPosition = new Schema({

@@ -4,5 +4,6 @@ remote.env
 *.env
 test*.json
 test.js
-
+testing/
+data/
 

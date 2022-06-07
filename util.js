@@ -1,21 +1,6 @@
 import { Player } from "./db_models.js"
+import {tournStateMap as stateMap,tournTypeMap as typeMap, countries} from './constants.js'
 
-
-const stateMap = {
-    65: "announced",
-    71: "registering",
-    83: "seating",
-    82: "running",
-    67: "cancelled",
-    68: "completed",
-    85: "unfinished"
-}
-
-const typeMap = {
-    71: "sit-and-go",
-    83: "scheduled",
-    77: "manual"
-}
 
 
 class Tournament {
@@ -107,10 +92,19 @@ export async function parsePlayer(data,site) {
     const playerId = data.pid
     const playerName = data.n
     const uniqueId = `${playerName}_${playerId}`
+    let country
+    
+    try {
+        country = countries[data.pcd]['n']
+    }
+    catch(err) {
+        console.log(`unable to determine country for ${playerId} ${firstName} ${lastName}`)
+    }
+    
 
     const now = new Date()
 
-    const player = new Player({
+    const playerArgs = {
         uniqueId: uniqueId,
         playerName: playerName,
         playerId: playerId,
@@ -118,26 +112,10 @@ export async function parsePlayer(data,site) {
         playerSurname: lastName,
         site: site,
         lastActive: now,
-    })
-
-    const existing = await Player.findOne({uniqueId:uniqueId})
-    if(existing) {
-        console.log(`already have ${playerName} in the database.  skipping...`)
+        country: country
     }
 
-    else {
-        try {
-            await player.save()
-            console.log(`Successfully inserted ${playerName}`)
-        }
-        catch(err) {
-            console.error("Error trying to insert " + playerName)
-            console.error(err)
-        }
-
-    }
-
-
+    await Player.findOneAndUpdate({uniqueId:uniqueId}, playerArgs, {upsert:true})
 
 }
 
@@ -150,7 +128,6 @@ export async function parseTournamentPlayers(response, tState, site) {
 
     for(let i=0; i<response.players.length;i++) {
         const player = response.players[i]
-        console.log("parsing for " + player.n + " id: " + player.pid)
         await parsePlayer(player,site)
     }
 

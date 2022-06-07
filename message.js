@@ -32,6 +32,9 @@ const MessageGenerator = () => {
                 t: "GetTournamentPlayers"
             }
 
+        },
+        GetCountries: () => {
+            return { "locale": "", "skin": "", "version": 0, "t": "GetCountries" }
         }
     }
 

@@ -6,6 +6,7 @@ import { parseTournamentList, parseLobbyTournamentInfo, parseTournamentPlayers }
 class WebSocketScraper {
   constructor(websocketUrl,site) {
     this.ws = new WebSocket(websocketUrl)
+    this.websocketUrl = websocketUrl
     this.site = site
     this._msgId = 1001
     this.lobbyState = null
@@ -52,7 +53,7 @@ class WebSocketScraper {
 
   init = () => {
     this.ws.on('open', () => {
-      console.log('connected')
+      console.log('connected to ' + this.websocketUrl)
       this.ping = setInterval(() => {
         this.ws.send(
           JSON.stringify({ ...InitialMessage(), id: this._msgId }), this.incrementMsgId()
@@ -62,7 +63,7 @@ class WebSocketScraper {
 
     this.ws.on("close", (code, reason) => {
       console.log(`${code}: ${reason.toString()}`)
-      console.log("websocket disconnected")
+      console.log(`websocket ${this.websocketUrl} disconnected`)
       clearInterval(this.ping)
 
     })
@@ -97,7 +98,6 @@ class WebSocketScraper {
 
     this.ws.send(JSON.stringify({ ...GetTournamentList(), id: this._msgId }), this.incrementMsgId)
     const msgId = await this.getMsgId()
-    console.log("msg id is " + msgId)
 
     return new Promise((resolve, reject) => {
       const checkTList = () => {
@@ -126,7 +126,6 @@ class WebSocketScraper {
       const check = () => {
         if (this.responses[msgId]) {
           const lobbyTournInfo = parseLobbyTournamentInfo(this.responses[msgId])
-          console.log(lobbyTournInfo.startDate)
           return resolve(lobbyTournInfo)
         }
         setTimeout(check, 50)

@@ -14,7 +14,6 @@ const runScraper = async (config) => {
     await scraper.init()
     console.log("initialized")
     const tournamentList = await scraper.getTournamentList()
-    console.log("got t list: " + tournamentList.length)
 
 
     const runningList = tournamentList.filter(t => t.state === 'running' && t.type !== 'sit-and-go')
