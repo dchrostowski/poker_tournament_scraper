@@ -122,7 +122,6 @@ export async function parsePlayer(data,site) {
 
     const existing = await Player.findOne({uniqueId:uniqueId})
     if(existing) {
-        console.log(existing)
         console.log(`already have ${playerName} in the database.  skipping...`)
     }
 
