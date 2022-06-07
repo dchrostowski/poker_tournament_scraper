@@ -4,8 +4,9 @@ const { GetTournamentList, InitialMessage, GetLobbyTournamentInfo, GetTournament
 import { parseTournamentList, parseLobbyTournamentInfo, parseTournamentPlayers } from './util.js'
 
 class WebSocketScraper {
-  constructor(websocketUrl) {
+  constructor(websocketUrl,site) {
     this.ws = new WebSocket(websocketUrl)
+    this.site = site
     this._msgId = 1001
     this.lobbyState = null
     this.initialized = false
@@ -147,7 +148,7 @@ class WebSocketScraper {
     return new Promise((resolve, reject) => {
       const check = () => {
         if (this.responses[msgId]) {
-          const playerInfo = parseTournamentPlayers(this.responses[msgId], tState)
+          const playerInfo = parseTournamentPlayers(this.responses[msgId], tState, this.site)
           return resolve(playerInfo)
         }
         setTimeout(check, 50)

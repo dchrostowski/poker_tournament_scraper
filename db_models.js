@@ -1,6 +1,17 @@
 import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
+
+const player = new Schema({
+    uniqueId: {type: String, required: true, unique: true},
+    playerName: {type: String, required: true },
+    playerId: {type: Number, required: true},
+    playerGivenName: {type:String, required:false},
+    playerSurname: {type: String, required: false},
+    site: {type: String, required: true},
+    lastActive: {type: Date, required: true}
+})
+
 const playerPosition = new Schema({
     playerName: { type: String, required: true },
     position: { type: Number, required: true },
@@ -67,6 +78,7 @@ export const TournamentResult = mongoose.model("TournamentResult", tournamentRes
 export const PlayerPosition = mongoose.model("PlayerPosition", playerPosition)
 export const RunningTournament = mongoose.model("RunningTournament", runningTournament)
 export const RunningTournamentArchive = mongoose.model('RunningTournamentArchive',runningTournament)
+export const Player = mongoose.model('Player', player)
 
 export const RegisteringTournament = mongoose.model(
     "RegisteringTournament",

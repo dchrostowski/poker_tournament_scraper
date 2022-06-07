@@ -10,7 +10,7 @@ import { insertRunningOrReg, insertComplete } from "./db_operations.js"
 
 const runScraper = async (config) => {
     console.log("starting scraper for " + config.site)
-    const scraper = new WebSocketScraper(config.socketUrl)
+    const scraper = new WebSocketScraper(config.socketUrl, config.site)
     await scraper.init()
     console.log("initialized")
     const tournamentList = await scraper.getTournamentList()

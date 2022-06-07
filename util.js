@@ -1,3 +1,4 @@
+import { Player } from "./db_models.js"
 
 
 const stateMap = {
@@ -100,13 +101,61 @@ function processRunningPlayers(unsortedPlayers) {
 
 }
 
+export async function parsePlayer(data,site) {
+    const firstName = data?.pn || ''
+    const lastName = data?.pfn || ''
+    const playerId = data.pid
+    const playerName = data.n
+    const uniqueId = `${playerName}_${playerId}`
 
-export function parseTournamentPlayers(response, tState) {
+    const now = new Date()
+
+    const player = new Player({
+        uniqueId: uniqueId,
+        playerName: playerName,
+        playerId: playerId,
+        playerGivenName: firstName,
+        playerSurname: lastName,
+        site: site,
+        lastActive: now,
+    })
+
+    const existing = await Player.findOne({uniqueId:uniqueId})
+    if(existing) {
+        console.log(existing)
+        console.log(`already have ${playerName} in the database.  skipping...`)
+    }
+
+    else {
+        try {
+            await player.save()
+            console.log(`Successfully inserted ${playerName}`)
+        }
+        catch(err) {
+            console.error("Error trying to insert " + playerName)
+            console.error(err)
+        }
+
+    }
+
+
+
+}
+
+
+export async function parseTournamentPlayers(response, tState, site) {
 
     const players = response?.players || []
 
     if (players.length === 0) return []
 
+    for(let i=0; i<response.players.length;i++) {
+        const player = response.players[i]
+        console.log("parsing for " + player.n + " id: " + player.pid)
+        await parsePlayer(player,site)
+    }
+
+    
     const unsortedPlayers = getUnsortedPlayers(response, tState)
     if (tState === 'running' || tState === 'registering') {
         const sortedPlayers = processRunningPlayers(unsortedPlayers)
