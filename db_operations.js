@@ -86,17 +86,17 @@ async function pruneRegisteringAndRunning(uniqueId) {
             }
         })
     }
-    await RegisteringTournament.deleteOne({uniqueId: uniqueId})
-    
+    await RegisteringTournament.deleteOne({ uniqueId: uniqueId })
+
 
 
     const targetDate = new Date()
-    targetDate.setTime(targetDate.getTime() - (1000*20*60))
+    targetDate.setTime(targetDate.getTime() - (1000 * 20 * 60))
 
 
     const resRun = await RunningTournament.deleteMany({ lastUpdate: { $lt: targetDate } })
     console.log(`Deleted ${resRun.deletedCount} old running tournaments`)
-    const regRun =  await RegisteringTournament.deleteMany({ lastUpdate: { $lt: targetDate } })
+    const regRun = await RegisteringTournament.deleteMany({ lastUpdate: { $lt: targetDate } })
     console.log(`Deleted ${regRun.deletedCount} old registering tournaments`)
 }
 
@@ -112,6 +112,19 @@ export async function insertComplete(record) {
         const running = await RunningTournament.findOne({ uniqueId: record.uniqueId })
         if (running) {
             record = createNewPlayerSetWithRebuyValues(record, running)
+            const completedResults = record.toObject().results
+            running.players = completedResults
+            running.lastUpdate = new Date()
+            running.save((err) => {
+                if (err) {
+                    console.log("error on updating " + rid(running))
+
+                }
+                else {
+                    console.log("successfully updated " + rid(running))
+                }
+            })
+
 
         }
 
@@ -122,6 +135,7 @@ export async function insertComplete(record) {
             }
             else {
                 console.log("successfully inserted " + rid)
+
 
             }
         })

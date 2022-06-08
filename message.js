@@ -35,6 +35,29 @@ const MessageGenerator = () => {
         },
         GetCountries: () => {
             return { "locale": "", "skin": "", "version": 0, "t": "GetCountries" }
+        },
+        GetUserDetails: (pid) => {
+            return {
+                playerId: pid,
+                "t": "GetPlayerDetails"
+            }
+        },
+        LoginWithAuthToken: (authToken) => {
+            return {
+                "login": "",
+                "password": authToken,
+                "oldAuth": "null",
+                "tfaAuth": "",
+                "tfaType": 95,
+                "t": "Login"
+            }
+        },
+
+        GetTableState: (tableId, entryIdx, isRealTable) => {
+            //entryIdx should be 0
+            // isRealTable should be false
+            return { "tableId": tableId, "playerEntryIdx": entryIdx, "isRealTable": isRealTable, "t": "GetTableState" }
+
         }
     }
 
