@@ -93,12 +93,15 @@ export async function parsePlayer(data,site) {
     const playerName = data.n
     const uniqueId = `${playerName}_${playerId}`
     let country
+    let countryCode
     
     try {
         country = countries[data.pcd]['n']
+        countryCode = countries[data.pcd]['s']
     }
     catch(err) {
         console.log(`unable to determine country for ${playerId} ${firstName} ${lastName}`)
+        
     }
     
 
@@ -112,7 +115,8 @@ export async function parsePlayer(data,site) {
         playerSurname: lastName,
         site: site,
         lastActive: now,
-        country: country
+        country: country,
+        countryCode: countryCode,
     }
 
     await Player.findOneAndUpdate({uniqueId:uniqueId}, playerArgs, {upsert:true})

@@ -10,7 +10,8 @@ const player = new Schema({
     playerSurname: {type: String, required: false},
     site: {type: String, required: true},
     lastActive: {type: Date, required: true},
-    country: {type: String, required: false}
+    country: {type: String, required: false},
+    countryCode: {type: String, required: false},
 })
 
 const playerPosition = new Schema({
