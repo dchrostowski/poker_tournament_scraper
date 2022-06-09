@@ -1,5 +1,5 @@
 import { Player } from "./db_models.js"
-import {tournStateMap as stateMap,tournTypeMap as typeMap, countries} from './constants.js'
+import { tournStateMap as stateMap, tournTypeMap as typeMap, countries } from './constants.js'
 
 
 
@@ -13,9 +13,9 @@ class Tournament {
 }
 
 class LobbyTournamentInfo {
-    
+
     constructor(info) {
-        this.id = info.i
+        this.id = info?.i
         this.name = info.n
         this.state = stateMap[info.s]
         this.type = typeMap[info.tt]
@@ -25,7 +25,7 @@ class LobbyTournamentInfo {
         this.entryFee = (info?.e || 0) / 100
         this.bounty = (info?.bkv || 0) / 100
         this.startingChips = info.sf
-        
+
 
     }
 }
@@ -39,7 +39,7 @@ export function parseTournamentList(response) {
 }
 
 export function parseLobbyTournamentInfo(resp) {
-    
+
     return new LobbyTournamentInfo(resp.info)
 }
 
@@ -86,7 +86,7 @@ function processRunningPlayers(unsortedPlayers) {
 
 }
 
-export async function parsePlayer(data,site) {
+export async function parsePlayer(data, site) {
     const firstName = data?.pn || ''
     const lastName = data?.pfn || ''
     const playerId = data.pid
@@ -94,16 +94,16 @@ export async function parsePlayer(data,site) {
     const uniqueId = `${playerName}_${playerId}`
     let country
     let countryCode
-    
+
     try {
         country = countries[data.pcd]['n']
         countryCode = countries[data.pcd]['s']
     }
-    catch(err) {
+    catch (err) {
         console.log(`unable to determine country for ${playerId} ${firstName} ${lastName}`)
-        
+
     }
-    
+
 
     const now = new Date()
 
@@ -119,7 +119,7 @@ export async function parsePlayer(data,site) {
         countryCode: countryCode,
     }
 
-    await Player.findOneAndUpdate({uniqueId:uniqueId}, playerArgs, {upsert:true})
+    await Player.findOneAndUpdate({ uniqueId: uniqueId }, playerArgs, { upsert: true })
 
 }
 
@@ -130,12 +130,12 @@ export async function parseTournamentPlayers(response, tState, site) {
 
     if (players.length === 0) return []
 
-    for(let i=0; i<response.players.length;i++) {
+    for (let i = 0; i < response.players.length; i++) {
         const player = response.players[i]
-        await parsePlayer(player,site)
+        await parsePlayer(player, site)
     }
 
-    
+
     const unsortedPlayers = getUnsortedPlayers(response, tState)
     if (tState === 'running' || tState === 'registering') {
         const sortedPlayers = processRunningPlayers(unsortedPlayers)

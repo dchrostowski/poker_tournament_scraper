@@ -1,10 +1,10 @@
 import WebSocket from 'ws';
 import MessageGenerator from './message.js'
-const { GetTournamentList, InitialMessage, GetLobbyTournamentInfo, GetTournamentPlayers, GetUserDetails, LoginWithAuthToken, GetTableState } = MessageGenerator()
+const { GetTournamentList, InitialMessage, GetLobbyTournamentInfo, GetTournamentPlayers, GetUserDetails, LoginWithAuthToken, GetTableState, SelectTable } = MessageGenerator()
 import { parseTournamentList, parseLobbyTournamentInfo, parseTournamentPlayers } from './util.js'
 
 class WebSocketScraper {
-  constructor(websocketUrl, site) {
+  constructor(websocketUrl, site, respCB) {
     this.ws = new WebSocket(websocketUrl)
     this.authToken = null
     this.websocketUrl = websocketUrl
@@ -15,10 +15,14 @@ class WebSocketScraper {
     this.lobbyTournamentInfo = {}
     this.tournamentList = []
     this.responses = {}
-
-
-
+    this.gameStates = {}
+    const defaultFunc = () => { }
+    this.responseCallback = respCB
   }
+
+
+
+
 
   incrementMsgId = async () => {
     this._msgId = this._msgId + 1
@@ -31,39 +35,33 @@ class WebSocketScraper {
   _handleIncomingMessage = (resp) => {
 
     const t = resp.t
+    this.responses[resp?.srcMsgId] = resp
+
+
+
+    if (typeof this.responseCallback === 'function') this.responseCallback(resp)
+
     switch (t) {
       case 'AuthState': {
         this.authToken = resp.auth
-        this.initialized = true;
         break;
       }
       case 'LobbyState': {
         this.initialized = true
+        break;
+      }
+      case 'GameState': {
+        if (!this.gameStates[resp.gameState.ti]) {
+          this.gameStates[resp.gameState.ti] = [resp]
+        }
+        else {
+          this.gameStates[resp.gameState.ti].push(resp)
+        }
+
 
         break;
       }
-      case 'TournamentsList': {
-        this.responses[resp.srcMsgId] = resp
-        break;
-      }
-      case 'LobbyTournamentInfo': {
-        this.responses[resp.srcMsgId] = resp
-        break;
-      }
-      case 'TournamentPlayers': {
-        this.responses[resp.srcMsgId] = resp
-        break;
-      }
-      case 'UserDetails': {
-        console.log("user details")
-        console.log(resp)
-        this.responses[resp.srcMsgId] = resp
-        break;
-      }
       default:
-        this.responses[resp.srcMsgId] = resp
-        //console.log("got response " + resp.t)
-        //console.log(resp)
         return
 
     }
@@ -83,6 +81,12 @@ class WebSocketScraper {
       check()
     })
 
+
+
+  }
+
+  setResponseCallback = async (cb) => {
+    this.responseCallback = cb
   }
 
   loginWithToken = async (authTkn) => {
@@ -91,7 +95,7 @@ class WebSocketScraper {
     }
     const msgId = await this.getMsgId()
 
-    this.ws.send(JSON.stringify({ ...LoginWithAuthToken(authTkn), id: msgId }), this.incrementMsgId())
+    this.ws.send(JSON.stringify({ ...LoginWithAuthToken(authTkn), id: msgId }), this.incrementMsgId)
 
     return new Promise((resolve, reject) => {
       const check = () => {
@@ -111,8 +115,7 @@ class WebSocketScraper {
       console.log('connected to ' + this.websocketUrl)
       this.ping = setInterval(() => {
         this.ws.send(
-          JSON.stringify({ ...InitialMessage(), id: this._msgId }), this.incrementMsgId()
-        )
+          JSON.stringify({ ...InitialMessage(), id: this._msgId }), this.incrementMsgId)
       }, 5000)
     });
 
@@ -120,6 +123,7 @@ class WebSocketScraper {
       console.log(`${code}: ${reason.toString()}`)
       console.log(`websocket ${this.websocketUrl} disconnected`)
       clearInterval(this.ping)
+      console.log(this.gameStates)
 
     })
 
@@ -175,7 +179,7 @@ class WebSocketScraper {
       throw ("socket not initialized!")
     }
     const msgId = await this.getMsgId()
-    this.ws.send(JSON.stringify({ ...GetLobbyTournamentInfo(tournamentId), id: msgId }), this.incrementMsgId())
+    this.ws.send(JSON.stringify({ ...GetLobbyTournamentInfo(tournamentId), id: msgId }), this.incrementMsgId)
 
     return new Promise((resolve, reject) => {
       const check = () => {
@@ -197,7 +201,7 @@ class WebSocketScraper {
     }
     const msgId = await this.getMsgId()
 
-    this.ws.send(JSON.stringify({ ...GetTournamentPlayers(tournamentId), id: msgId }), this.incrementMsgId())
+    this.ws.send(JSON.stringify({ ...GetTournamentPlayers(tournamentId), id: msgId }), this.incrementMsgId)
 
     return new Promise((resolve, reject) => {
       const check = () => {
@@ -219,7 +223,7 @@ class WebSocketScraper {
     }
     const msgId = await this.getMsgId()
 
-    this.ws.send(JSON.stringify({ ...GetUserDetails(pid), id: msgId }), this.incrementMsgId())
+    this.ws.send(JSON.stringify({ ...GetUserDetails(pid), id: msgId }), this.incrementMsgId)
 
     return new Promise((resolve, reject) => {
       const check = () => {
@@ -241,7 +245,7 @@ class WebSocketScraper {
     }
     const msgId = await this.getMsgId()
 
-    this.ws.send(JSON.stringify({ ...GetTableState(tableId, entryIdx, isReal), id: msgId }), this.incrementMsgId())
+    this.ws.send(JSON.stringify({ ...GetTableState(tableId, entryIdx, isReal), id: msgId }), this.incrementMsgId)
 
     return new Promise((resolve, reject) => {
       const check = () => {
@@ -254,8 +258,60 @@ class WebSocketScraper {
       }
       check()
     })
+  }
+
+  selectTable = async (tableId) => {
+    if (!this.initialized) {
+      throw ("socket not initialized!")
+    }
+
+
+
+    const msgId = await this.getMsgId()
+    console.log("sending ")
+    console.log(JSON.stringify({ ...SelectTable(tableId), id: msgId }))
+    console.log("-----------------------------------------")
+    this.ws.send(JSON.stringify({ ...SelectTable(tableId), id: msgId }), this._incrementMsgId)
+
+    return new Promise((resolve, reject) => {
+      const check = () => {
+        if (this.responses[msgId]) {
+          const responseData = this.responses[msgId]
+
+          return resolve(responseData)
+        }
+        setTimeout(check, 50)
+
+      }
+      check()
+    })
+
+  }
+
+  sendMessage = async (message) => {
+    if (!this.initialized) {
+      throw ("socket not initialized!")
+    }
+    const msgId = await this.getMsgId()
+
+
+    this.ws.send(JSON.stringify({ ...message, id: msgId }), this.incrementMsgId)
+
+    return new Promise((resolve, reject) => {
+      const check = () => {
+
+        if (this.responses[msgId]) {
+          const responseData = this.responses[msgId]
+          return resolve(responseData)
+        }
+        setTimeout(check, 50)
+
+      }
+      check()
+    })
 
   }
 }
+
 
 export default WebSocketScraper
