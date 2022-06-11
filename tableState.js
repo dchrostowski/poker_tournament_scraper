@@ -93,6 +93,7 @@ if (scenario == 3 || scenario == 4 || scenario == 5 || scenario == 6 || scenario
         if (resp.t === 'GameState') {
             const { events, gameState } = resp
             const { s, ...everythingElse1 } = gameState
+            const seats = s
 
             if (scenario == 3) {
                 console.log("----------------------------------------------------")
@@ -131,44 +132,89 @@ if (scenario == 3 || scenario == 4 || scenario == 5 || scenario == 6 || scenario
                     9: 'raised',
                     6: 'posted the small blind',
                     7: 'posted the big blind',
+                    16: "timed out and mucked their cards",
                     10: 'won the hand',
                     11: 'mucked their hand'
                 }
 
+                // seats.forEach((seat, idx) => {
+                //     if (seat !== null) {
+                //         console.log("Seat " + idx + ": " + seat.n)
+                //     }
+
+                // })
+
+                // t 7 s 3 f 4000
+
                 if (events) {
+
+
+                    const pot = gameState.d?.p
+                    const communityCards = gameState.d?.c
+
+                    ///if (communityCards) console.log("community cards: " + communityCards)
+
+                    //if (pot) console.log("Pot: " + pot)
+
                     events.forEach((event) => {
-                        if (event?.s && event?.a) {
-                            const playerName = s[event.s]?.n || 'Nobody'
-                            const action = actionMap?.[event.a] || 'did something'
+                        const seatIndex = event['s']
+                        const actionIndex = event['a']
 
-                            let chips = event?.f
+                        //console.log(event)
 
 
-                            if (chips) {
-                                chips = `with ${chips} chips`
+                        if (event?.s && event?.a && event.t === 9) {
+
+
+                            const playerName = seats[seatIndex]?.n || 'Nobody'
+                            const action = actionMap[actionIndex] || 'did something'
+
+
+                            const remainingChips = seats[seatIndex]['c']
+
+
+
+                            let playedChips = event?.f
+
+
+                            if (playedChips) {
+                                playedChips = `with ${playedChips} chips`
                             }
                             else {
-                                chips = ""
+                                playedChips = ""
                             }
 
                             let allIn = ""
-                            if (s[event.s].c === 0) {
+                            if (typeof remainingChips === 'undefined' || remainingChips === 0 && event?.a !== 10) {
                                 allIn = " and is all-in"
+
                             }
 
-                            const statement = `${playerName} ${action} ${chips}${allIn}`
-                            console.log(statement)
-
+                            const statement = `${playerName} ${action} ${playedChips}${allIn}`
+                            if (event?.a !== 10 && event?.a !== 16) {
+                                console.log(statement)
+                            }
                             if (action === 'did something') {
-                                console.log("debug: ")
+                                console.log("debug:")
                                 console.log(event)
                             }
 
+
+
+                        }
+
+                        if (event?.t === 7 && event?.s && event?.f) {
+                            const winner = seats[seatIndex]?.n
+                            const amount = event?.f
+                            console.log(`${winner} wins the hand and gets ${amount} chips`)
 
                         }
 
 
                     })
+                    console.log("-----------------------------------")
+
+
 
                 }
 
