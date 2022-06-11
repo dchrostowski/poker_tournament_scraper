@@ -124,6 +124,64 @@ if (scenario == 3 || scenario == 4 || scenario == 5 || scenario == 6 || scenario
 
             else if (scenario == 7) {
 
+
+                //c d h s
+                const cardMap = {
+                    0: "2c",
+                    1: "2d",
+                    2: "2h",
+                    3: "2s",
+                    4: "3c",
+                    5: "3d",
+                    6: "3h",
+                    7: "3s",
+                    8: "4c",
+                    9: "4d",
+                    10: "4h",
+                    11: "4s",
+                    12: "5c",
+                    13: "5d",
+                    14: "5h",
+                    15: "5s",
+                    16: "6c",
+                    17: "6d",
+                    18: "6h",
+                    19: "6s",
+                    20: "7c",
+                    21: "7d",
+                    22: "7h",
+                    23: "7s",
+                    24: "8c",
+                    25: "8d",
+                    26: "8h",
+                    27: "8s",
+                    28: "9c",
+                    29: "9d",
+                    30: "9h",
+                    31: "9s",
+                    32: "Tc",
+                    33: "Td",
+                    34: "Th",
+                    35: "Ts",
+                    36: "Jc",
+                    37: "Jd",
+                    38: "Jh",
+                    39: "Js",
+                    40: "Qc",
+                    41: "Qd",
+                    42: "Qh",
+                    43: "Qs",
+                    44: "Kc",
+                    45: "Kd",
+                    46: "Kh",
+                    47: "Ks",
+                    48: "Ac",
+                    49: "Ad",
+                    50: "Ah",
+                    51: "As"
+
+                }
+
                 const actionMap = {
                     1: 'folded',
                     2: 'checked',
@@ -146,13 +204,23 @@ if (scenario == 3 || scenario == 4 || scenario == 5 || scenario == 6 || scenario
 
                 // t 7 s 3 f 4000
 
+
                 if (events) {
 
 
                     const pot = gameState.d?.p
                     const communityCards = gameState.d?.c
+                    let cardArray = []
+                    if (communityCards) {
+                        cardArray = communityCards.split(";")
 
-                    ///if (communityCards) console.log("community cards: " + communityCards)
+                        cardArray.forEach((card, idx) => {
+                            const cardId = cardMap[card] || '?'
+                            cardArray[idx] = cardId
+
+                        })
+
+                    }
 
                     //if (pot) console.log("Pot: " + pot)
 
@@ -165,9 +233,19 @@ if (scenario == 3 || scenario == 4 || scenario == 5 || scenario == 6 || scenario
 
                         if (event?.s && event?.a && event.t === 9) {
 
+                            if (cardArray.length === 3) console.log("Flop:")
+                            if (cardArray.length > 2) {
+                                if (cardArray.length === 4) console.log("Turn:")
+                            }
+
+                            if (cardArray.length === 5) console.log("River")
+
+                            if (cardArray.length > 2) {
+                                console.log(cardArray)
+                            }
 
                             const playerName = seats[seatIndex]?.n || 'Nobody'
-                            const action = actionMap[actionIndex] || 'did something'
+                            let action = actionMap[actionIndex] || 'did something'
 
 
                             const remainingChips = seats[seatIndex]['c']
@@ -175,6 +253,8 @@ if (scenario == 3 || scenario == 4 || scenario == 5 || scenario == 6 || scenario
 
 
                             let playedChips = event?.f
+
+
 
 
                             if (playedChips) {
@@ -207,6 +287,7 @@ if (scenario == 3 || scenario == 4 || scenario == 5 || scenario == 6 || scenario
                             const winner = seats[seatIndex]?.n
                             const amount = event?.f
                             console.log(`${winner} wins the hand and gets ${amount} chips`)
+                            console.log(event)
 
                         }
 
