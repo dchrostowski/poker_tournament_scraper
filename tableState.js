@@ -39,7 +39,7 @@ const defaultCallback = (resp) => {
 
 }
 
-const scraper = new WebSocketScraper(rounderConfig.socketUrl, rounderConfig.site, defaultCallback)
+const scraper = new WebSocketScraper(stockConfig.socketUrl, stockConfig.site, defaultCallback)
 await scraper.init()
 console.log("initialized")
 const tournamentList = await scraper.getTournamentList()
@@ -57,18 +57,18 @@ console.log(runningTableData)
 
 
 const printFooter = (label) => {
-    return `=====${label}=====${new Date().getTime()}===${scenario}=====`
+    return `=====${label}=====${new Date().toLocaleTimeString()}===${scenario}=====`
 }
 
-const interval = setInterval(getTableLoop2, 5000)
+//const interval = setInterval(getTableLoop2, 5000)
 
+await scraper.sendMessage(GetTableState(tableId))
 
 if (scenario == 2 || scenario == 1) {
-    scraper.setResponseCallback((resp) => {
+    scraper.setResponseCallback(async (resp) => {
         if (resp.t === 'TableState') {
             const { seats, ...everythingElse } = resp
             if (scenario == 1) {
-                console.log("----------TableState" + new Date() + "-------------")
                 console.log(everythingElse)
                 console.log(printFooter())
 
@@ -76,19 +76,24 @@ if (scenario == 2 || scenario == 1) {
             else {
 
                 console.log(seats)
+                console.log(printFooter())
+
 
             }
+        }
+
+        else if (resp.t === 'GameState') {
+            return await scraper.sendMessage(GetTableState(tableId))
         }
     })
 }
 
-if (scenario == 3 || scenario == 4 || scenario == 5 || scenario == 6) {
+if (scenario == 3 || scenario == 4 || scenario == 5 || scenario == 6 || scenario == 7) {
     scraper.setResponseCallback((resp) => {
         if (resp.t === 'GameState') {
             const { events, gameState } = resp
             const { s, ...everythingElse1 } = gameState
 
-            console.log("scenario: " + scenario)
             if (scenario == 3) {
                 console.log("----------------------------------------------------")
                 console.log(events)
@@ -104,7 +109,6 @@ if (scenario == 3 || scenario == 4 || scenario == 5 || scenario == 6) {
 
                 console.log("----------------------------------------------------")
                 console.log([s[0], s[1], s[2]]);
-                console.log('wut')
                 console.log(printFooter('GAME STATE S[0-4'))
 
             }
@@ -114,6 +118,62 @@ if (scenario == 3 || scenario == 4 || scenario == 5 || scenario == 6) {
                 console.log("----------------------------------------------------")
                 console.log([s[3], s[4], s[5]]);
                 console.log(printFooter('GAME STATE S[5-9'))
+
+            }
+
+            else if (scenario == 7) {
+
+                const actionMap = {
+                    1: 'folded',
+                    2: 'checked',
+                    3: 'called',
+                    8: 'bet',
+                    9: 'raised',
+                    6: 'posted the small blind',
+                    7: 'posted the big blind',
+                    10: 'won the hand',
+                    11: 'mucked their hand'
+                }
+
+                if (events) {
+                    events.forEach((event) => {
+                        if (event?.s && event?.a) {
+                            const playerName = s[event.s]?.n || 'Nobody'
+                            const action = actionMap?.[event.a] || 'did something'
+
+                            let chips = event?.f
+
+
+                            if (chips) {
+                                chips = `with ${chips} chips`
+                            }
+                            else {
+                                chips = ""
+                            }
+
+                            let allIn = ""
+                            if (s[event.s].c === 0) {
+                                allIn = " and is all-in"
+                            }
+
+                            const statement = `${playerName} ${action} ${chips}${allIn}`
+                            console.log(statement)
+
+                            if (action === 'did something') {
+                                console.log("debug: ")
+                                console.log(event)
+                            }
+
+
+                        }
+
+
+                    })
+
+                }
+
+
+
 
             }
 
