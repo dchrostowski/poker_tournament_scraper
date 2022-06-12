@@ -3,7 +3,7 @@ version: '3'
 services:
   mongo:
     image: mongo:4.1.8-xenial
-    container_name: db
+    container_name: db2
     restart: unless-stopped
     env_file: .env
     ports:
@@ -12,7 +12,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=$MONGO_USERNAME
       - MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASSWORD
     volumes:
-      - dbdata:/data/db
+      - dbdata2:/data/db
     networks:
       - scraper-network
   scrapers:
@@ -43,4 +43,4 @@ networks:
 
 volumes:
   node_modules:
-  dbdata:
+  dbdata2:
