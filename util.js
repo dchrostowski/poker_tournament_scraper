@@ -16,15 +16,42 @@ class LobbyTournamentInfo {
 
     constructor(info) {
         this.id = info?.i
-        this.name = info.n
+        this.name = info?.n
         this.state = stateMap[info.s]
         this.type = typeMap[info.tt]
         this.startDate = info?.sd ? new Date(info.sd + " UTC") : null
         this.endDate = info?.le ? new Date(info.le + " UTC") : null
         this.buyIn = (info?.b || 0) / 100
         this.entryFee = (info?.e || 0) / 100
-        this.bounty = (info?.bkv || 0) / 100
         this.startingChips = info.sf
+
+        let bounty = null
+        let addonCost = null
+        let addonFee = null
+        let rebuyCost = null
+        let rebuyFee = null
+
+        if (info?.bkv) {
+            bounty = info.bkv / 100
+        }
+
+        if (info?.achc) {
+            addonCost = info.achc / 100
+            addonFee = (info?.afee || 0) / 100
+        }
+
+        if (info?.rchc) {
+            rebuyCost = info.rchc / 100
+            rebuyFee = (info?.rfee || 0) / 100
+        }
+
+
+        this.bounty = bounty
+
+        this.addonCost = addonCost
+        this.addonFee = addonFee
+        this.rebuyCost = rebuyCost
+        this.rebuyFee = rebuyFee
 
 
     }
@@ -54,16 +81,23 @@ function getUnsortedPlayers(playerDataResponse, tState) {
         const rf = player?.rf || 0
         const ma = player?.ma || 0
 
+        const numAddons = player?.na || 0
+        const numRebuys = player?.nr || 0
+
         const pdata = {
             playerName: player.n,
             position: (player?.p || 0) + 1,
             prize1: ma / 100,
             prize2: bp / 100,
             totalPrize: (ma + bp) / 100,
-            chips: player.c
+            chips: player.c,
         }
 
-        if (tState === "running") pdata["rebuyAmount"] = (eb + rf) / 100
+
+        if (tState === "running" || tState === 'completed') {
+            pdata['numAddons'] = numAddons
+            pdata['numRebuys'] = numRebuys
+        }
 
         return pdata
     })

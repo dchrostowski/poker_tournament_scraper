@@ -3,15 +3,15 @@ const Schema = mongoose.Schema
 
 
 const player = new Schema({
-    uniqueId: {type: String, required: true, unique: true},
-    playerName: {type: String, required: true },
-    playerId: {type: Number, required: true},
-    playerGivenName: {type:String, required:false},
-    playerSurname: {type: String, required: false},
-    site: {type: String, required: true},
-    lastActive: {type: Date, required: true},
-    country: {type: String, required: false},
-    countryCode: {type: String, required: false},
+    uniqueId: { type: String, required: true, unique: true },
+    playerName: { type: String, required: true },
+    playerId: { type: Number, required: true },
+    playerGivenName: { type: String, required: false },
+    playerSurname: { type: String, required: false },
+    site: { type: String, required: true },
+    lastActive: { type: Date, required: true },
+    country: { type: String, required: false },
+    countryCode: { type: String, required: false },
 })
 
 const playerPosition = new Schema({
@@ -20,7 +20,9 @@ const playerPosition = new Schema({
     prize1: { type: Number, default: 0 },
     prize2: { type: Number, default: 0 },
     totalPrize: { type: Number, required: true },
-    rebuyAmount: { type: Number, required: false },
+    rebuyAddonTotal: { type: Number, required: false },
+    numRebuys: { type: Number, required: false },
+    numAddons: { type: Number, required: false },
     chips: { type: Number, required: false }
 })
 
@@ -40,13 +42,18 @@ const tournamentResult = new Schema({
     tournamentType: { type: String, required: true },
     buyin: { type: Number, required: true },
     entryFee: { type: Number, required: true },
-    bounty: { type: Number, required: true },
+    rebuy: { type: Number, required: false },
+    rebuyFee: { type: Number, required: false },
+    addon: { type: Number, required: false },
+    addonFee: { type: Number, required: false },
+    bounty: { type: Number, required: false },
     startingChips: { type: Number, required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     bitcoinValue: { type: Number, required: false },
     currency: { type: String, required: true },
     results: { type: [playerPosition], required: true }
+
 
 })
 
@@ -57,7 +64,12 @@ const runningTournament = new Schema({
     tournamentType: { type: String, required: true },
     tournamentName: { type: String, required: true },
     startingChips: { type: Number, required: true },
-    startDate: {type: Date, required: false},
+    startDate: { type: Date, required: false },
+    rebuy: { type: Number, required: false },
+    rebuyFee: { type: Number, required: false },
+    addon: { type: Number, required: false },
+    addonFee: { type: Number, required: false },
+    bounty: { type: Number, required: false },
     site: { type: String, required: true },
     lastUpdate: { type: Date, required: true },
     players: { type: [playerPosition], required: true }
@@ -70,7 +82,7 @@ const registeringTournament = new Schema({
     tournamentType: { type: String, required: true },
     tournamentName: { type: String, required: true },
     startingChips: { type: Number, required: true },
-    startDate: {type: Date, required: false},
+    startDate: { type: Date, required: false },
     site: { type: String, required: true },
     lastUpdate: { type: Date, required: true },
     players: { type: [playerPosition], required: false }
@@ -79,7 +91,7 @@ const registeringTournament = new Schema({
 export const TournamentResult = mongoose.model("TournamentResult", tournamentResult)
 export const PlayerPosition = mongoose.model("PlayerPosition", playerPosition)
 export const RunningTournament = mongoose.model("RunningTournament", runningTournament)
-export const RunningTournamentArchive = mongoose.model('RunningTournamentArchive',runningTournament)
+export const RunningTournamentArchive = mongoose.model('RunningTournamentArchive', runningTournament)
 export const Player = mongoose.model('Player', player)
 
 export const RegisteringTournament = mongoose.model(

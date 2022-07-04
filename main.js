@@ -30,7 +30,6 @@ const runScraper = async (config) => {
         //const lti = await scraper.getLobbyTournamentInfo(t.id)
         const lti = await scraper.sendMessage(GetLobbyTournamentInfo(t.id), parseLobbyTournamentInfo)
         const pd = await scraper.getTournamentPlayers(t.id, t.state)
-        const results = pd.map((player) => new PlayerPosition(player))
 
         const runningTournamentArgs = {
             uniqueId: `${config.tournamentIdPrefix}_${lti.id}`,
@@ -42,9 +41,42 @@ const runScraper = async (config) => {
             startingChips: lti.startingChips,
             site: config.site,
             lastUpdate: new Date(),
-            players: results,
+
         }
 
+        let calcRebuyAddonTotal = false
+
+        if (lti.rebuyCost !== null) {
+            runningTournamentArgs['rebuy'] = lti.rebuyCost
+            runningTournamentArgs['rebuyFee'] = lti.rebuyFee
+            calcRebuyAddonTotal = true
+
+
+        }
+
+        if (lti.addonCost !== null) {
+            runningTournamentArgs['addon'] = lti.addonCost
+            runningTournamentArgs['addonFee'] = lti.addonFee
+            calcRebuyAddonTotal = true
+        }
+
+        if (lti.bounty) {
+            runningTournamentArgs['bounty'] = lti.bounty
+        }
+
+
+
+
+        const results = pd.map((player) => {
+            if (calcRebuyAddonTotal) {
+                const rebuyTotal = (player.numRebuys * (runningTournamentArgs.rebuy + runningTournamentArgs.rebuyFee)).toFixed(2)
+                const addonTotal = (player.numAddons * (runningTournamentArgs.addon + runningTournamentArgs.addonFee)).toFixed(2)
+                player['rebuyAddonTotal'] = rebuyTotal + addonTotal
+            }
+            return new PlayerPosition(player)
+        })
+
+        runningTournamentArgs['players'] = results
         insertRunningOrReg(RunningTournament(runningTournamentArgs))
     }
 
@@ -74,10 +106,10 @@ const runScraper = async (config) => {
         const t = completedList[i]
         const lti = await scraper.sendMessage(GetLobbyTournamentInfo(t.id), parseLobbyTournamentInfo)
         const pd = await scraper.getTournamentPlayers(t.id, t.state)
-        const results = pd.map((player) => new PlayerPosition(player))
 
+        let calcRebuyAddonTotal = false
 
-        const completedTournamentArgs = {
+        let completedTournamentArgs = {
             uniqueId: `${config.tournamentIdPrefix}_${lti.id}`,
             site: config.site,
             tournamentId: lti.id,
@@ -86,13 +118,44 @@ const runScraper = async (config) => {
             tournamentType: lti.type,
             buyin: lti.buyIn,
             entryFee: lti.entryFee,
-            bounty: lti.bounty,
             startingChips: lti.startingChips,
             startDate: lti.startDate,
             endDate: lti.endDate,
             currency: config.currency,
-            results: results
         }
+
+        if (lti.rebuyCost !== null) {
+            completedTournamentArgs['rebuy'] = lti.rebuyCost
+            completedTournamentArgs['rebuyFee'] = lti.rebuyFee
+            calcRebuyAddonTotal = true
+
+
+        }
+
+        if (lti.addonCost !== null) {
+            completedTournamentArgs['addon'] = lti.addonCost
+            completedTournamentArgs['addonFee'] = lti.addonFee
+            calcRebuyAddonTotal = true
+        }
+
+        if (lti.bounty) {
+            completedTournamentArgs['bounty'] = lti.bounty
+        }
+
+        const results = pd.map((player) => {
+            if (calcRebuyAddonTotal) {
+                const rebuyTotal = (player.numRebuys * (completedTournamentArgs.rebuy + completedTournamentArgs.rebuyFee)).toFixed(2)
+                const addonTotal = (player.numAddons * (completedTournamentArgs.addon + completedTournamentArgs.addonFee)).toFixed(2)
+                player['rebuyAddonTotal'] = rebuyTotal + addonTotal
+            }
+            return new PlayerPosition(player)
+        })
+
+        completedTournamentArgs['results'] = results
+
+
+
+
 
         try {
             insertComplete(TournamentResult(completedTournamentArgs))

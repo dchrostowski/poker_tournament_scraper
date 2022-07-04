@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
 import MessageGenerator from './message.js'
-const { InitialMessage, GetTournamentPlayers, GetUserDetails, LoginWithAuthToken, GetTableState, SelectTable } = MessageGenerator()
+const { InitialMessage, GetTournamentPlayers, LoginWithAuthToken } = MessageGenerator()
 import { parseTournamentPlayers } from './util.js'
 
 class WebSocketScraper {
@@ -70,8 +70,6 @@ class WebSocketScraper {
       }
       check()
     })
-
-
 
   }
 
@@ -147,77 +145,6 @@ class WebSocketScraper {
         if (this.responses[msgId]) {
           const playerInfo = parseTournamentPlayers(this.responses[msgId], tState, this.site)
           return resolve(playerInfo)
-        }
-        setTimeout(check, 50)
-
-      }
-      check()
-    })
-
-  }
-
-  getUserDetails = async (pid) => {
-    if (!this.initialized) {
-      throw ("socket not initialized!")
-    }
-    const msgId = await this.getMsgId()
-
-    this.ws.send(JSON.stringify({ ...GetUserDetails(pid), id: msgId }), this.incrementMsgId)
-
-    return new Promise((resolve, reject) => {
-      const check = () => {
-        if (this.responses[msgId]) {
-          const playerInfo = this.responses[msgId]
-          return resolve(this.responses[msgId])
-        }
-        setTimeout(check, 50)
-
-      }
-      check()
-    })
-
-  }
-
-  geTableState = async (tableId, entryIdx, isReal) => {
-    if (!this.initialized) {
-      throw ("socket not initialized!")
-    }
-    const msgId = await this.getMsgId()
-
-    this.ws.send(JSON.stringify({ ...GetTableState(tableId, entryIdx, isReal), id: msgId }), this.incrementMsgId)
-
-    return new Promise((resolve, reject) => {
-      const check = () => {
-        if (this.responses[msgId]) {
-          const responseData = this.responses[msgId]
-          return resolve(responseData)
-        }
-        setTimeout(check, 50)
-
-      }
-      check()
-    })
-  }
-
-  selectTable = async (tableId) => {
-    if (!this.initialized) {
-      throw ("socket not initialized!")
-    }
-
-
-
-    const msgId = await this.getMsgId()
-    console.log("sending ")
-    console.log(JSON.stringify({ ...SelectTable(tableId), id: msgId }))
-    console.log("-----------------------------------------")
-    this.ws.send(JSON.stringify({ ...SelectTable(tableId), id: msgId }), this._incrementMsgId)
-
-    return new Promise((resolve, reject) => {
-      const check = () => {
-        if (this.responses[msgId]) {
-          const responseData = this.responses[msgId]
-
-          return resolve(responseData)
         }
         setTimeout(check, 50)
 
