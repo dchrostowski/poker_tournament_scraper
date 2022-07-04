@@ -4,7 +4,7 @@ const { InitialMessage, GetTournamentPlayers, GetUserDetails, LoginWithAuthToken
 import { parseTournamentPlayers } from './util.js'
 
 class WebSocketScraper {
-  constructor(websocketUrl, site, respCB) {
+  constructor(websocketUrl, site) {
     this.ws = new WebSocket(websocketUrl)
     this.authToken = null
     this.websocketUrl = websocketUrl
@@ -16,7 +16,6 @@ class WebSocketScraper {
     this.tournamentList = []
     this.responses = {}
     this.gameStates = {}
-    this.responseCallback = respCB
   }
 
   incrementMsgId = async () => {
@@ -31,10 +30,6 @@ class WebSocketScraper {
 
     const t = resp.t
     this.responses[resp?.srcMsgId] = resp
-
-
-
-    if (typeof this.responseCallback === 'function') this.responseCallback(resp)
 
     switch (t) {
       case 'AuthState': {
@@ -78,10 +73,6 @@ class WebSocketScraper {
 
 
 
-  }
-
-  setResponseCallback = async (cb) => {
-    this.responseCallback = cb
   }
 
   loginWithToken = async (authTkn) => {
