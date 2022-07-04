@@ -8,8 +8,8 @@ import {
 import { getDBConnection } from "./db.js"
 import { insertRunningOrReg, insertComplete } from "./db_operations.js"
 import MessageGenerator from './message.js'
-const { GetTournamentList, InitialMessage, GetLobbyTournamentInfo, GetTournamentPlayers, GetUserDetails, LoginWithAuthToken, GetTableState, SelectTable } = MessageGenerator()
-import { parseTournamentList, parseLobbyTournamentInfo, parseTournamentPlayers } from './util.js'
+const { GetTournamentList, GetLobbyTournamentInfo } = MessageGenerator()
+import { parseTournamentList, parseLobbyTournamentInfo } from './util.js'
 
 const runScraper = async (config) => {
     console.log("starting scraper for " + config.site)

@@ -16,7 +16,6 @@ class WebSocketScraper {
     this.tournamentList = []
     this.responses = {}
     this.gameStates = {}
-    const defaultFunc = () => { }
     this.responseCallback = respCB
   }
 
