@@ -49,7 +49,6 @@ const runScraper = async (config) => {
         if (lti.rebuyCost !== null) {
             runningTournamentArgs['rebuy'] = lti.rebuyCost
             runningTournamentArgs['rebuyFee'] = lti.rebuyFee
-            console.log('blah')
             calcRebuyAddonTotal = true
 
 
@@ -145,15 +144,14 @@ const runScraper = async (config) => {
             completedTournamentArgs['bounty'] = lti.bounty
         }
 
-        console.log("calc rehuy add on total?")
-        console.log(calcRebuyAddonTotal)
+
+
 
         const results = pd.map((player) => {
             if (calcRebuyAddonTotal) {
                 const rebuyTotal = player.numRebuys * (completedTournamentArgs.rebuy + completedTournamentArgs.rebuyFee)
                 const addonTotal = player.numAddons * (completedTournamentArgs.addon + completedTournamentArgs.addonFee)
                 player['rebuyAddonTotal'] = parseFloat((rebuyTotal + addonTotal).toFixed(2))
-                console.log(player)
             }
             return new PlayerPosition(player)
         })
