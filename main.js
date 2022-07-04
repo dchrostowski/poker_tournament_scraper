@@ -7,22 +7,28 @@ import {
 } from "./db_models.js"
 import { getDBConnection } from "./db.js"
 import { insertRunningOrReg, insertComplete } from "./db_operations.js"
+import MessageGenerator from './message.js'
+const { GetTournamentList, InitialMessage, GetLobbyTournamentInfo, GetTournamentPlayers, GetUserDetails, LoginWithAuthToken, GetTableState, SelectTable } = MessageGenerator()
+import { parseTournamentList, parseLobbyTournamentInfo, parseTournamentPlayers } from './util.js'
 
 const runScraper = async (config) => {
     console.log("starting scraper for " + config.site)
     const scraper = new WebSocketScraper(config.socketUrl, config.site)
     await scraper.init()
     console.log("initialized")
-    const tournamentList = await scraper.getTournamentList()
+
+    const tournamentList = await scraper.sendMessage(GetTournamentList(), parseTournamentList)
 
 
     const runningList = tournamentList.filter(t => t.state === 'running' && t.type !== 'sit-and-go')
     const registeringList = tournamentList.filter(t => t.state === 'registering' && t.type !== 'sit-and-go')
     const completedList = tournamentList.filter(t => t.state === 'completed' && t.type !== 'sit-and-go')
 
+
     for (let i = 0; i < runningList.length; i++) {
         const t = runningList[i]
-        const lti = await scraper.getLobbyTournamentInfo(t.id)
+        //const lti = await scraper.getLobbyTournamentInfo(t.id)
+        const lti = await scraper.sendMessage(GetLobbyTournamentInfo(t.id), parseLobbyTournamentInfo)
         const pd = await scraper.getTournamentPlayers(t.id, t.state)
         const results = pd.map((player) => new PlayerPosition(player))
 
@@ -44,7 +50,7 @@ const runScraper = async (config) => {
 
     for (let i = 0; i < registeringList.length; i++) {
         const t = registeringList[i]
-        const lti = await scraper.getLobbyTournamentInfo(t.id)
+        const lti = await scraper.sendMessage(GetLobbyTournamentInfo(t.id), parseLobbyTournamentInfo)
 
         const pd = await scraper.getTournamentPlayers(t.id, t.state)
         const results = pd.map((player) => new PlayerPosition(player))
@@ -66,7 +72,7 @@ const runScraper = async (config) => {
 
     for (let i = 0; i < completedList.length; i++) {
         const t = completedList[i]
-        const lti = await scraper.getLobbyTournamentInfo(t.id)
+        const lti = await scraper.sendMessage(GetLobbyTournamentInfo(t.id), parseLobbyTournamentInfo)
         const pd = await scraper.getTournamentPlayers(t.id, t.state)
         const results = pd.map((player) => new PlayerPosition(player))
 
@@ -88,14 +94,14 @@ const runScraper = async (config) => {
             results: results
         }
 
-        try{
-          insertComplete(TournamentResult(completedTournamentArgs))
+        try {
+            insertComplete(TournamentResult(completedTournamentArgs))
         }
-        catch(err) {
-          console.log(err)
+        catch (err) {
+            console.log(err)
         }
 
-        
+
 
     }
 

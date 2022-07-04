@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 import MessageGenerator from './message.js'
-const { GetTournamentList, InitialMessage, GetLobbyTournamentInfo, GetTournamentPlayers, GetUserDetails, LoginWithAuthToken, GetTableState, SelectTable } = MessageGenerator()
-import { parseTournamentList, parseLobbyTournamentInfo, parseTournamentPlayers } from './util.js'
+const { InitialMessage, GetTournamentPlayers, GetUserDetails, LoginWithAuthToken, GetTableState, SelectTable } = MessageGenerator()
+import { parseTournamentPlayers } from './util.js'
 
 class WebSocketScraper {
   constructor(websocketUrl, site, respCB) {
@@ -19,10 +19,6 @@ class WebSocketScraper {
     const defaultFunc = () => { }
     this.responseCallback = respCB
   }
-
-
-
-
 
   incrementMsgId = async () => {
     this._msgId = this._msgId + 1
@@ -148,53 +144,6 @@ class WebSocketScraper {
 
   }
 
-  getTournamentList = async () => {
-    if (!this.initialized) {
-      throw ("socket not initialized!")
-    }
-    if (this.tournamentList.length > 0) return this.tournamentList
-
-
-    this.ws.send(JSON.stringify({ ...GetTournamentList(), id: this._msgId }), this.incrementMsgId)
-    const msgId = await this.getMsgId()
-
-    return new Promise((resolve, reject) => {
-      const checkTList = () => {
-        if (this.tournamentList.length > 0) return this.tournamentList
-
-        if (this.responses[msgId]) {
-
-          const tList = parseTournamentList(this.responses[msgId])
-          this.tournamentList = tList
-          return resolve(tList)
-        }
-        setTimeout(checkTList, 50)
-      }
-      checkTList()
-    })
-  }
-
-  getLobbyTournamentInfo = async (tournamentId) => {
-    if (!this.initialized) {
-      throw ("socket not initialized!")
-    }
-    const msgId = await this.getMsgId()
-    this.ws.send(JSON.stringify({ ...GetLobbyTournamentInfo(tournamentId), id: msgId }), this.incrementMsgId)
-
-    return new Promise((resolve, reject) => {
-      const check = () => {
-        if (this.responses[msgId]) {
-          const lobbyTournInfo = parseLobbyTournamentInfo(this.responses[msgId])
-          return resolve(lobbyTournInfo)
-        }
-        setTimeout(check, 50)
-
-      }
-      check()
-    })
-
-  }
-
   getTournamentPlayers = async (tournamentId, tState) => {
     if (!this.initialized) {
       throw ("socket not initialized!")
@@ -288,7 +237,7 @@ class WebSocketScraper {
 
   }
 
-  sendMessage = async (message) => {
+  sendMessage = async (message, responseCallback) => {
     if (!this.initialized) {
       throw ("socket not initialized!")
     }
@@ -302,6 +251,9 @@ class WebSocketScraper {
 
         if (this.responses[msgId]) {
           const responseData = this.responses[msgId]
+          if (responseCallback) {
+            return resolve(responseCallback(responseData))
+          }
           return resolve(responseData)
         }
         setTimeout(check, 50)
