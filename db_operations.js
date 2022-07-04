@@ -47,25 +47,6 @@ export async function insertRunningOrReg(record) {
 
 }
 
-export function createNewPlayerSetWithRebuyValues(oldTournamentResult, existingRunning) {
-    const rid = ri(oldTournamentResult)
-    console.log(`setting rebuy amounts for ${rid}`)
-    console.log(`running tournament has ${existingRunning.players.length} and tournament record has ${oldTournamentResult.results.length}`)
-    const namesToRebuys = {}
-    existingRunning.players.forEach((player) => {
-        namesToRebuys[player.playerName] = player.rebuyAmount
-    })
-    const newSet = oldTournamentResult.results.map((player) => {
-        console.log(`set ${player.playerName} rebuy amount to ${namesToRebuys[player.playerName]}`)
-        player.rebuyAmount = namesToRebuys[player.playerName] || 0
-
-        return player
-    })
-    oldTournamentResult.results = newSet
-    return oldTournamentResult
-
-}
-
 async function pruneRegisteringAndRunning(uniqueId) {
     const running = await RunningTournament.findOne({ 'uniqueId': uniqueId })
     if (running) {
@@ -111,17 +92,14 @@ export async function insertComplete(record) {
     else {
         const running = await RunningTournament.findOne({ uniqueId: record.uniqueId })
         if (running) {
-            record = createNewPlayerSetWithRebuyValues(record, running)
-            const completedResults = record.toObject().results
-            running.players = completedResults
             running.lastUpdate = new Date()
             running.save((err) => {
                 if (err) {
-                    console.log("error on updating " + rid(running))
+                    console.log("error on updating " + rid)
 
                 }
                 else {
-                    console.log("successfully updated " + rid(running))
+                    console.log("successfully updated " + rid)
                 }
             })
 

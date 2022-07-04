@@ -53,12 +53,16 @@ const MessageGenerator = () => {
             }
         },
 
-        GetTableState: (tableId, entryIdx, isRealTable) => {
+        GetTableState: (tableId) => {
             //entryIdx should be 0
             // isRealTable should be false
-            return { "tableId": tableId, "playerEntryIdx": entryIdx, "isRealTable": isRealTable, "t": "GetTableState" }
-
+            return { "tableId": tableId, "playerEntryIdx": 0, "isRealTable": false, "t": "GetTableState" }
+        },
+        SelectTable: (tableId) => {
+            return { "password": "", "tableId": tableId, "playerEntryIdx": 0, "t": "SelectTable" }
         }
+
+
     }
 
 }
